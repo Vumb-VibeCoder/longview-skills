@@ -1,0 +1,8 @@
+[
+  {"id": "S1", "goal": "Characterization tests for billing totals (current behaviour, including known quirks)", "type": "CHARACTERIZE", "depends_on": [], "hours": 6,
+   "verify": "pytest tests/characterization/test_billing.py passes on unmodified code", "rollback": "delete the new test files", "behavior_change": false, "debt_ids": ["D01"]},
+  {"id": "S2", "goal": "Introduce a Currency value object and route billing.py through it, default VND", "type": "SEAM", "depends_on": ["S1"], "hours": 5,
+   "verify": "S1 tests still pass; module_graph shows no new cross-module edges", "rollback": "git revert the commit", "behavior_change": false, "debt_ids": ["D01"]},
+  {"id": "S3", "goal": "Replace the 6 hard-coded currency literals with the value object", "type": "REPLACE", "depends_on": ["S2"], "hours": 3,
+   "verify": "scan_line_risks reports 0 M01 in billing.py; S1 tests pass", "rollback": "git revert", "behavior_change": false, "debt_ids": ["D01"]}
+]
