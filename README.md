@@ -1,4 +1,4 @@
-# longview-skills (v3)
+# longview-skills
 
 Skills that make an AI **avoid short-sightedness**: judging whether a line, a module, a whole codebase, a financial plan, a design or a UI will hold up over its real lifetime, and knowing when long-term thinking is **not** needed.
 
