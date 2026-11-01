@@ -1,0 +1,37 @@
+[
+  {
+    "id": "A01",
+    "assumption": "Order list stays under 10,000 rows",
+    "evidence": "prod export 2026-10: 3,100 rows",
+    "confidence": "BELIEVED",
+    "impact": "HIGH",
+    "expires": "2027-02-01",
+    "owner": "dev-lead",
+    "check": "count rows each run",
+    "check_command": "python3 -c \"import sys; sys.exit(0 if 3100 < 5000 else 1)\"",
+    "threshold": "5,000 rows (50% of failure point)",
+    "on_trigger": "replace nested loop with dict index; run change-injection x100"
+  },
+  {
+    "id": "A03",
+    "assumption": "Timezone is always UTC",
+    "evidence": "checked config",
+    "confidence": "VERIFIED",
+    "impact": "LOW",
+    "expires": "2027-05-01",
+    "owner": "dev-lead"
+  },
+  {
+    "id": "A02",
+    "assumption": "Payments API keeps response schema v1",
+    "evidence": "vendor docs v1 page",
+    "confidence": "GUESSED",
+    "impact": "HIGH",
+    "expires": "2027-01-15",
+    "owner": "dev-lead",
+    "check": "weekly contract test",
+    "threshold": "any required field missing",
+    "on_trigger": "update wrapper",
+    "check_command": "python3 tests/contract_payments.py"
+  }
+]

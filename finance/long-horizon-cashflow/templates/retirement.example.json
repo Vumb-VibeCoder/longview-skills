@@ -1,0 +1,23 @@
+{
+  "start_cash": 500000,
+  "months": 360,
+  "income_monthly": 0,
+  "expenses_monthly": 2500,
+  "inflation_annual": 0.03,
+  "expense_growth_annual": 0.0,
+  "return_annual": 0.05,
+  "return_compounding": "monthly_nominal",
+  "expense_indexing": "annual_step",
+  "scenarios": [
+    {
+      "name": "withdrawals indexed to 3%",
+      "expense_growth_annual": 0.03,
+      "must_survive": false
+    },
+    {
+      "name": "returns 2 points lower",
+      "return_annual": 0.03,
+      "must_survive": false
+    }
+  ]
+}

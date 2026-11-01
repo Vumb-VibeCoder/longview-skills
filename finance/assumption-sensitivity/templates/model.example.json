@@ -1,0 +1,5 @@
+{"formula": "units*(price-unit_cost)-fixed_cost", "threshold": 0,
+ "inputs": {"units": {"base": 1000, "low": 600, "high": 1200},
+            "price": {"base": 25, "low": 22, "high": 28},
+            "unit_cost": {"base": 14, "low": 13, "high": 18},
+            "fixed_cost": {"base": 6000, "low": 6000, "high": 9000}}}

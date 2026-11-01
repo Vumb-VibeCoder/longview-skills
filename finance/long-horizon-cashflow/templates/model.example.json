@@ -1,0 +1,15 @@
+{
+  "start_cash": 20000,
+  "months": 60,
+  "income_monthly": 3000,
+  "expenses_monthly": 2200,
+  "income_growth_annual": 0.03,
+  "inflation_annual": 0.04,
+  "one_offs": [{"month": 24, "amount": -8000, "label": "equipment replacement"}],
+  "scenarios": [
+    {"name": "income -40% from month 12", "income_shock_from_month": 12, "income_shock": -0.4},
+    {"name": "inflation 9%", "inflation_annual": 0.09, "expense_growth_annual": 0.09},
+    {"name": "job loss + big repair", "income_shock_from_month": 6, "income_shock": -1.0,
+     "add_one_offs": [{"month": 8, "amount": -5000}], "must_survive": false}
+  ]
+}

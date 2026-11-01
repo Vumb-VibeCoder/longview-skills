@@ -1,0 +1,2 @@
+{"options": ["Buy now", "Wait 12 months", "Rent"], "scenarios": ["prices rise 15%", "prices flat", "prices fall 20%"],
+ "payoff": [[30, 0, -40], [-10, 0, 25], [-5, -5, 5]], "probs": [0.25, 0.45, 0.30]}
