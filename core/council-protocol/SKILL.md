@@ -47,5 +47,9 @@ Investment checks: option | P | C_late - C_prepared | C_prep + C_carry | decisio
 DECISION: ACCEPTED | REJECTED | DEFERRED | Reopen when: <tripwire>
 ```
 
+## Exit path
+- **Missing input:** no concrete decision or options: ask for them; the debate needs something to argue about.
+- **Stop or hand off:** if the three roles agree at once, stop and record the decision; do not stage a fake disagreement.
+
 ## Limits
 When one AI plays all three roles it can converge falsely. For one-way doors, have a **separate session or a human** play the adversarial roles. The formula is only as good as its estimates: show the ranges.

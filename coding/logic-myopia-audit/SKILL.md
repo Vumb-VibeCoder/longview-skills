@@ -37,5 +37,9 @@ Use CHANGE MODEL only when violation is MEDIUM or higher and the cost of the mod
 ## Output
 The model summary, the invariant table above, the history measurements, and open questions for domain owners.
 
+## Exit path
+- **Missing input:** no code or no stated intent: ask for the intended behaviour; cannot audit the model without it.
+- **Stop or hand off:** if the code is correct and small, report `no finding` rather than inventing one.
+
 ## Limits
 Requires understanding the domain. Where the AI is unsure about the real world, it must ask a person, not assume.

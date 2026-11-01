@@ -12,12 +12,14 @@ Detects:
   M04  duplicated block of >= 6 non-trivial lines across or within files (one report per duplicated region)
   M05  loops nested 3+ deep in one function; whole-input reads (.read(), .readlines())
   M06  `global` statement (hidden shared state / order dependence)
+  M05  (also) network call without a timeout: requests/httpx get/post/..., urlopen
+  M12  float arithmetic on a money-named value (price, total, amount, tax, fee, balance, ...)
   M08  function longer than 60 lines, more than 6 parameters (self/cls excluded), 3+ boolean-default flags
   NOTE TODO/FIXME/HACK comments (unrecorded debt; not a myopia pattern by itself)
 """
 import ast, collections, hashlib, json, os, sys
 
-ALLOWED_NUMBERS = {0, 1, -1, 2, 100}
+ALLOWED_NUMBERS = {0, 1, -1, 2, 100, 60, 1000, 1024, 3600, 86400}  # includes common unit-conversion constants
 LONG_FUNC, MANY_ARGS, DUP_MIN_LINES, NEST_LIMIT = 60, 6, 6, 3
 SKIP_DIRS = {".git", "node_modules", "venv", ".venv", "__pycache__", "build", "dist"}
 
@@ -57,6 +59,40 @@ def loop_depth_report(fn):
     return best
 
 
+MONEY_WORDS = ("price", "total", "amount", "cost", "tax", "fee", "balance", "subtotal", "salary", "payment", "revenue", "discount")
+HTTP_VERBS = {"get", "post", "put", "patch", "delete", "head", "request"}
+
+
+def _name_of(node):
+    """Best-effort identifier for a Name, Attribute or string-subscript, lower-cased ('' if none)."""
+    if isinstance(node, ast.Name):
+        return node.id.lower()
+    if isinstance(node, ast.Attribute):
+        return node.attr.lower()
+    if isinstance(node, ast.Subscript) and isinstance(node.slice, ast.Constant) and isinstance(node.slice.value, str):
+        return node.slice.value.lower()
+    return ""
+
+
+def _is_money(node):
+    n = _name_of(node)
+    return bool(n) and any(w in n for w in MONEY_WORDS)
+
+
+def _has_float(node):
+    return any(isinstance(c, ast.Constant) and isinstance(c.value, float) for c in ast.walk(node))
+
+
+def _no_timeout(node):
+    """True for requests/httpx.<verb>(...) or urlopen(...) with no timeout keyword and no **kwargs to hide one."""
+    f = node.func
+    hit = (isinstance(f, ast.Attribute) and f.attr in HTTP_VERBS and isinstance(f.value, ast.Name) and f.value.id in ("requests", "httpx")) \
+        or (isinstance(f, ast.Attribute) and f.attr == "urlopen") or (isinstance(f, ast.Name) and f.id == "urlopen")
+    if not hit:
+        return False
+    return not any(k.arg == "timeout" or k.arg is None for k in node.keywords) and not (len(node.args) >= 3 and getattr(f, "attr", getattr(f, "id", "")) == "urlopen")
+
+
 def scan_file(path):
     out = []
     try:
@@ -83,6 +119,17 @@ def scan_file(path):
                 out.append((path, node.lineno, "M03", "except BaseException"))
             elif swallow:
                 out.append((path, node.lineno, "M03", "handler body is only pass/... (error swallowed)"))
+        if isinstance(node, ast.Call) and _no_timeout(node):
+            out.append((path, node.lineno, "M05", "network call without timeout (a slow remote hangs the caller)"))
+        if not in_test:
+            if isinstance(node, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
+                tg = node.targets if isinstance(node, ast.Assign) else [node.target]
+                if node.value is not None and any(_is_money(t) for t in tg) and _has_float(node.value):
+                    out.append((path, node.lineno, "M12", "float arithmetic on a money value (use Decimal or integer minor units)"))
+            elif isinstance(node, ast.BinOp) and isinstance(node.op, (ast.Mult, ast.Add, ast.Sub, ast.Div)):
+                pair = (node.left, node.right)
+                if any(isinstance(x, ast.Constant) and isinstance(x.value, float) for x in pair) and any(_is_money(x) for x in pair):
+                    out.append((path, node.lineno, "M12", "float arithmetic on a money value (use Decimal or integer minor units)"))
         if isinstance(node, ast.Global):
             out.append((path, node.lineno, "M06", f"global statement: {', '.join(node.names)}"))
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -111,7 +158,7 @@ def scan_file(path):
         low = line.lower()
         if "# todo" in low or "# fixme" in low or "# hack" in low:
             out.append((path, i, "NOTE", "marker comment: " + line.strip()[:50]))
-    return out
+    return list(dict.fromkeys(out))
 
 
 def find_duplicates(files):
@@ -125,7 +172,7 @@ def find_duplicates(files):
             block = lines[i:i + DUP_MIN_LINES]
             if sum(1 for l in block if len(l) > 3 and not l.startswith("#")) < DUP_MIN_LINES:
                 continue
-            seen[hashlib.sha1("\n".join(block).encode()).hexdigest()].append((p, i + 1))
+            seen[hashlib.sha256("\n".join(block).encode()).hexdigest()].append((p, i + 1))
     dups = {k: v for k, v in seen.items() if len(v) > 1}
     covered = {loc for v in dups.values() for loc in v}
     out = []

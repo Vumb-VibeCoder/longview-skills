@@ -49,5 +49,10 @@ After `assumption-ledger` has entries that require a tripwire (impact=HIGH and n
 ## Output
 The updated ledger JSON, the `tripwire_check.py` result, and a list of entries that are MANUAL with the reason.
 
+## Exit path
+- **Missing input:** no ledger yet: build one with `assumption-ledger` first, or stop.
+- **Script problem:** if `tripwire_check.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if an assumption cannot be checked automatically, give it an expiry date and an owner only.
+
 ## Limits
 Catches only assumptions that were stated and are measurable. `--run` executes the commands in the file without a shell; run only ledgers you trust.

@@ -40,7 +40,7 @@ python scoring/score.py --cases cases [--verified-only] \
 - You need enough cases (at least 30) to trust the numbers; fewer gives only an indication, and `score.py` says so.
 - Leakage: prompts do not contain the fixing or reverting commit. If the repo is public the AI may have seen it in training; prefer your own private repos.
 - Differences of a few cases between conditions are noise. With n cases per condition, a change of one decision moves recall by up to 1/n.
-- `run_api.py` was not tested against the real API (no key was available); run 1-2 cases first.
+- `run_api.py` was not tested against the real API (no key was available); run 1-2 cases first. If it fails for you, please open an issue using the "Benchmark runner bug" template; the maintainer cannot reproduce API errors without a key.
 
 ## Judged A/B rounds
 A second, cheaper benchmark compares an AI with and without the skills on fixed tasks, scored by a judge. Results, method and caveats: `RESULTS.md`. Judging kit and task sets: `judge/JUDGE.md`.

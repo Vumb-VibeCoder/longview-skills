@@ -43,5 +43,10 @@ Mutation check: id | baseline exit 0 | injected-violation exit 1 | location repo
 CI line: <the exact command>
 ```
 
+## Exit path
+- **Missing input:** no rule source (ADR or boundary): ask for the decision to enforce first.
+- **Script problem:** if `check_rules.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if a rule has too many false positives to run in CI, mark it advisory instead of deleting the check.
+
 ## Limits
 The runner uses import statements and line regexes. It misses dynamic imports, re-exports through aliases, and generated code; JS/TS import parsing is regex-based and Python uses the AST. Globs use `fnmatch` where `*` crosses `/`. It enforces structure, not correctness.

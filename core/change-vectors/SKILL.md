@@ -29,5 +29,9 @@ Business requirements · Scale (users, data volume) · Data (format, quality, ow
 ## Output
 | Vector | P (basis) | Cost if unprepared | Prepared today? | Conclusion (prepare / tripwire / ignore) |
 
+## Exit path
+- **Missing input:** no domain context: ask what is most likely to change, or list candidates as unconfirmed.
+- **Stop or hand off:** skip it for class A/B work.
+
 ## Limits
 Probabilities are subjective estimates: state the basis for each. UNKNOWN is an honest answer and should lead to a cheap tripwire, not a guess.

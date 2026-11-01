@@ -36,5 +36,9 @@ Any interface used by the public or by staff over a long period; before a launch
 ## Output
 The checklist with pass, fail or unverified per area and its evidence, the dependency and support inventory, the tripwires added, and the ranked remediation list.
 
+## Exit path
+- **Missing input:** no markup, screenshot or description: ask for one; do not claim compliance from a guess.
+- **Stop or hand off:** automated checks are partial; hand off real screen reader and keyboard testing to a person.
+
 ## Limits
 This is an engineering review, not a certified accessibility audit or legal advice: conformance claims need testing with real assistive technology and, where required, specialist or legal review. Standards and platform support change; confirm current versions before relying on a number here.

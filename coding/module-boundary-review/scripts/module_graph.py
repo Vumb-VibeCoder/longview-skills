@@ -22,7 +22,7 @@ def module_of(parts, depth):
 
 def py_targets(path, parts, rootname):
     try:
-        tree = ast.parse(open(path, errors="ignore").read())
+        tree = ast.parse(open(path, errors="ignore", encoding="utf-8").read())
     except SyntaxError:
         return []
     out = []
@@ -43,7 +43,7 @@ def py_targets(path, parts, rootname):
 
 
 def js_targets(path, parts):
-    txt = open(path, errors="ignore").read()
+    txt = open(path, errors="ignore", encoding="utf-8").read()
     base = "/".join(parts[:-1])
     return [os.path.normpath(os.path.join(base, m.group(1))).replace("\\", "/").split("/")
             for m in JS_IMPORT.finditer(txt)]

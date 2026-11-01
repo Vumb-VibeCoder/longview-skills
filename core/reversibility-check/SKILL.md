@@ -31,5 +31,9 @@ Decide fast where retreat is cheap; decide slowly and write it down where it is 
 ## Output
 | Decision | Exit cost at 6 months | Door | Hedge available (cost) | Hedge worth it? | ADR |
 
+## Exit path
+- **Missing input:** cost to undo unknown: ask for a range or mark it `UNKNOWN`.
+- **Stop or hand off:** a one-way door with no approval stops the work until someone confirms it.
+
 ## Limits
 Not every door deserves a hedge. Turning every one-way door into a two-way one is over-engineering (M10): `horizon-fit` sets how much to spend.

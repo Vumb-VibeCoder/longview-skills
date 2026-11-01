@@ -32,8 +32,9 @@ Any request to write, change, design or evaluate something that will exist after
    - F includes data, money, security, legal or safety, so the components touching that risk are **at least class C**, even inside a class A/B project.
    - A class B thing older than 6 months is reclassified **C**.
    - Real users exist, so **at least C**.
-3. If the result is **A or B** (and no escalator fired): verdict is TEMPORARY IS ENOUGH. Do only these: (a) make it correct, (b) record its debt with `debt-ledger`, (c) record the re-class trigger below. Stop; do not run council or three-horizon work.
-4. If a **mixed** result (e.g. a B prototype with one C component): split it. Apply the C/D process only to the escalated components and say which.
+3. If the result is **A or B** (and no escalator fired): verdict is TEMPORARY IS ENOUGH. Do only these: (a) make it correct, (b) record its debt with `debt-ledger`, (c) record the re-class trigger below. A secret (webhook URL, token, key) still goes in an environment variable, even in class B: it is one line and the cost of a leak does not shrink with the project. Stop; do not run council or three-horizon work.
+4. If a **mixed** result (e.g. a B prototype with one C component): split it. Apply the C/D process only to the escalated components and say which. Print the project class first and each escalated component with its own class: `CLASS: B | Components escalated: SMS sending -> C`. Do not print `C` for the whole project, because that triggers council and three-horizon work on the parts that are a throwaway. The rest of the project follows the TEMPORARY IS ENOUGH path.
+   A lifetime with no end date does not make a one-user script class C: own use plus time-only failure cost is class B, and the re-class trigger names what would change it (a second user, a shared repo, a date).
 5. If **C or D**: continue the standard flow: `assumption-ledger`, the domain skills, `council-protocol`, `three-horizon-map`, `verdict-format`.
 6. If inputs conflict or are missing and cannot be asked: classify on the evidence you have, mark the class **PROVISIONAL**, and name the one input whose answer would change the class.
 
@@ -52,10 +53,11 @@ A/B = its stated lifetime (at most 3 months). C = 1 year. D = 5 years. Probabili
 | Over-engineered | Class D architecture for a one-off script (see M10 in `myopia-patterns`) |
 | Temporary became permanent | Class B for more than 6 months, still handled as B |
 | Whole-project averaging | Classing the entire project B and ignoring the one component that holds money or data |
+| Reverse averaging | Classing the whole throwaway C because one component holds money, data or personal contacts; only that component is escalated |
 
 ## Output (exact shape)
 ```
-CLASS: <A|B|C|D> [PROVISIONAL] | Components escalated: <none | list>
+CLASS: <A|B|C|D> [PROVISIONAL] | Components escalated: <none | component -> class, ...>
 Reason: <2-3 sentences citing the evidence for L, N, F>
 Consequence: TEMPORARY IS ENOUGH | continue to standard flow
 Re-class trigger: <one concrete observable event that forces re-classing>
@@ -68,6 +70,10 @@ Debt: <what was deliberately left out and its likely interest>
 Re-class trigger: <same event as above>
 ```
 A feature that is not required for correctness and does not answer a named failure cost is cut (M10).
+
+## Exit path
+- **Missing input:** lifetime and users unknown: give the answer for both readings (for example internal versus published) and name the fact that decides it.
+- **Stop or hand off:** if class is A/B with no escalator, follow the TEMPORARY IS ENOUGH path and stop.
 
 ## Limits
 It cannot predict the future. It sets a reasonable investment level from present information, and must be re-run when that information changes.

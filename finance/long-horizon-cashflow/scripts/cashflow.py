@@ -5,7 +5,8 @@ Optional model fields for savings/retirement questions:
   return_annual            yearly return credited to a POSITIVE balance each month (overdrafts earn nothing)
   return_compounding       REQUIRED with return_annual: "monthly_nominal" (rate/12 per month) or "effective_annual" (1+r)^(1/12)-1
   expense_indexing         "monthly" (default, smooth growth) or "annual_step" (expenses rise once every 12 months, first rise after month 12)
-Exit code 1 if any scenario with must_survive != false runs out of cash."""
+Exit code 1 if any scenario with must_survive != false runs out of cash.
+Exit code 2 for input errors (unreadable file, missing or unknown keys, bad values)."""
 import json, sys, copy
 
 def run(m):
@@ -20,7 +21,7 @@ def run(m):
     if ret is not None:
         mode = m.get("return_compounding")
         if mode not in ("monthly_nominal", "effective_annual"):
-            raise SystemExit("ERROR: return_annual needs return_compounding = monthly_nominal | effective_annual")
+            raise ValueError("return_annual needs return_compounding = monthly_nominal | effective_annual")
         rm = ret / 12 if mode == "monthly_nominal" else (1 + ret) ** (1 / 12) - 1
     else:
         rm = 0.0
@@ -56,16 +57,51 @@ def apply(base, sc):
     m["one_offs"] = list(m.get("one_offs", [])) + list(sc.get("add_one_offs", []))
     return m
 
+MODEL_KEYS = {"start_cash", "income_monthly", "expenses_monthly", "months", "inflation_annual",
+              "income_growth_annual", "expense_growth_annual", "income_shock_from_month", "income_shock",
+              "return_annual", "return_compounding", "expense_indexing", "one_offs", "scenarios"}
+SCENARIO_KEYS = (MODEL_KEYS - {"scenarios", "one_offs", "start_cash", "income_monthly",
+                               "expenses_monthly", "months"}) | {"name", "must_survive", "add_one_offs"}
+
+def fail_input(msg):
+    """Input errors use exit 2 so CI can tell them apart from exit 1 (a must_survive scenario failed)."""
+    print("ERROR: " + msg, file=sys.stderr); sys.exit(2)
+
+def validate(base):
+    if not isinstance(base, dict):
+        fail_input("top level of the model must be a JSON object")
+    for k in ("start_cash", "income_monthly", "expenses_monthly", "months"):
+        if k not in base:
+            fail_input(f"missing field: {k}")
+    unknown = sorted(set(base) - MODEL_KEYS)
+    if unknown:
+        fail_input(f"unknown model key(s): {', '.join(unknown)} (typo? allowed: {', '.join(sorted(MODEL_KEYS))})")
+    scs = base.get("scenarios", [])
+    if not isinstance(scs, list):
+        fail_input("scenarios must be a list")
+    for i, sc in enumerate(scs):
+        if not isinstance(sc, dict) or "name" not in sc:
+            fail_input(f"scenario #{i + 1} must be an object with a name")
+        unknown = sorted(set(sc) - SCENARIO_KEYS)
+        if unknown:
+            fail_input(f"scenario '{sc['name']}': unknown key(s): {', '.join(unknown)} "
+                       f"(typo? allowed: {', '.join(sorted(SCENARIO_KEYS))})")
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
-    base = json.load(open(sys.argv[1]))
-    for k in ("start_cash", "income_monthly", "expenses_monthly", "months"):
-        if k not in base:
-            print(f"ERROR missing field: {k}"); sys.exit(2)
-    rows = [("BASE", True, run(base))]
-    for sc in base.get("scenarios", []):
-        rows.append((sc["name"], sc.get("must_survive", True), run(apply(base, sc))))
+    try:
+        with open(sys.argv[1], encoding="utf-8") as fh:
+            base = json.load(fh)
+    except (OSError, ValueError) as e:
+        fail_input(f"cannot read model file: {e}")
+    validate(base)
+    try:
+        rows = [("BASE", True, run(base))]
+        for sc in base.get("scenarios", []):
+            rows.append((sc["name"], sc.get("must_survive", True), run(apply(base, sc))))
+    except (TypeError, ValueError, KeyError) as e:
+        fail_input(f"bad value in model: {e!r}")
     if "--json" in sys.argv:
         print(json.dumps([{"scenario": n, **r} for n, _, r in rows], indent=2))
     else:

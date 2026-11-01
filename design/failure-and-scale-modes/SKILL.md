@@ -32,5 +32,9 @@ Any system with dependencies, shared state or growth. Run `horizon-fit` first; c
 ## Output
 The failure table, the amplifier findings, the idempotency findings, the saturation table with time-to-limit, the recovery check with what was actually tested, the tripwires, and the verdict.
 
+## Exit path
+- **Missing input:** no load or dependency numbers: ask, or give the failure modes without capacity claims.
+- **Stop or hand off:** with no architecture description, stop and list what is needed.
+
 ## Limits
 Estimates come from stated assumptions, not measurements; label them. This review does not replace load testing, chaos testing or a security review. Distributed-system faults can interact in ways a table does not predict.

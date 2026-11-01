@@ -54,7 +54,7 @@ def main():
         for p in git(repo, "ls-files", "--others", "--exclude-standard").splitlines():
             entries.append(("A", p))
             try:
-                n = sum(1 for _ in open(f"{repo}/{p}", errors="ignore")); nums[p] = (n, 0)
+                n = sum(1 for _ in open(f"{repo}/{p}", errors="ignore", encoding="utf-8")); nums[p] = (n, 0)
             except OSError:
                 pass
     mods, edited, added, tests, noise = {}, [], [], [], []

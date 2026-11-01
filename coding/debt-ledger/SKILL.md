@@ -46,5 +46,10 @@ No interest estimate; principal underestimated; no owner or due date (debt becom
 ## Output
 The ledger (JSON in the template format), the calculator output, and the PAY NOW set with its total principal and interest removed.
 
+## Exit path
+- **Missing input:** effort or interest estimates missing: ask for ranges; do not fill in numbers.
+- **Script problem:** if `debt_calc.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if breakeven is longer than the horizon, record the entry as ACCEPT with its re-check date.
+
 ## Limits
 Hour estimates are rough: use them to rank and choose, not to report precisely. The same frame works for non-code debts (see the `finance` skills when available).

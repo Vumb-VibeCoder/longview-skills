@@ -1,9 +1,0 @@
-[
-  {"id": "FF-001", "type": "forbid_import", "from": "src/core/*", "to": "^(src\\.)?(billing|orders)\\b",
-   "why": "ADR-0007: core is a leaf layer and must not depend on feature modules",
-   "allow": ["src/core/legacy_bridge.py"]},
-  {"id": "FF-002", "type": "forbid_pattern", "glob": "src/*.py", "regex": "\\bos\\.environ\\[",
-   "why": "ADR-0011: configuration is read only in src/config.py", "allow": ["src/config.py"]},
-  {"id": "FF-003", "type": "max_file_lines", "glob": "src/*.py", "max": 600,
-   "why": "Smell guard (class D only): files above this size were the origin of 3 of the last 5 incident fixes"}
-]

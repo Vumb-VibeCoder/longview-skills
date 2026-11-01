@@ -30,5 +30,10 @@ Before committing money or time to a plan with fixed obligations (rent, loan pay
 ## Output
 A table of scenarios with result and lowest balance and month, the reverse-stress break value, the verified mitigations, and the explicit list of accepted failures with their rationale.
 
+## Exit path
+- **Missing input:** no base model: build one with `long-horizon-cashflow` first.
+- **Script problem:** if `cashflow.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** a scenario that fails is a finding, not an error; report it and continue.
+
 ## Limits
 Scenarios are chosen by a person, so the test only covers what was imagined. It does not give probabilities; for the extreme tail use `tail-risk-review`. This is a planning tool, not financial advice.

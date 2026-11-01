@@ -20,9 +20,9 @@ Starting cash; monthly income and expenses; horizon in months; expected income g
 2. **Tie expenses to inflation by default.** Expenses grow with inflation unless you have a reason. Income does NOT automatically keep pace; set its growth explicitly. A plan where income grows slower than expenses is shrinking even if the balance rises today.
 3. **List lumpy costs separately** as one-offs with a month. Replacement cycles of equipment, vehicles, roofs, devices, insurance renewals and taxes belong here, not inside the monthly average. If none were named, ask; a plan with zero one-offs over 3+ years is almost always incomplete.
 4. **Define the survival test before the numbers:** at least three named shocks, each a concrete change to the model (for example income falls 40% from month 12, inflation 9%, income stops for 6 months plus a 5,000 repair). Mark which must be survived (`must_survive`, default true) and which are only informational.
-5. **Run it:** `python scripts/cashflow.py model.json`. For savings or retirement questions set `return_annual` together with `return_compounding`, and `expense_indexing: annual_step` for withdrawals raised once a year (see `templates/retirement.example.json`). It prints final nominal and real balance, the lowest balance and its month, and the first month cash goes negative, for the base case and each scenario. Exit code 1 means a must-survive scenario ran out of cash.
+5. **Run it:** `python scripts/cashflow.py model.json`. For savings or retirement questions set `return_annual` together with `return_compounding`, and `expense_indexing: annual_step` for withdrawals raised once a year (see `templates/retirement.example.json`; it deliberately exits 1 because the 3%-indexed scenario is marked must_survive and runs out of cash in month 250, while the lower-returns scenario is informational only). It prints final nominal and real balance, the lowest balance and its month, and the first month cash goes negative, for the base case and each scenario. Exit code 1 means a must-survive scenario ran out of cash.
 6. **Read the result by the minimum, not the end.** A plan that ends positive but dips below the floor in month 14 has failed at month 14. Report the lowest point and its month first.
-7. **If a scenario fails, give the smallest lever that fixes it** (a buffer of X, cutting Y, delaying one-off Z) and re-run to confirm. Do not propose a lever you have not re-run.
+7. **If a scenario fails, give the smallest lever that fixes it** (a buffer of X, cutting Y, delaying one-off Z) and re-run to confirm. Do not propose a lever you have not re-run. For a reverse-stress threshold ("spend at most X", "start with at least Y"), search for the boundary, round it in the safe direction (spending down, starting balance up), then re-run at the exact number you will print and confirm the scenario ends at or above the floor. A threshold that still ends below the floor by even one unit is wrong; print the margin left at the final month.
 8. Record the growth, inflation and shock assumptions in `assumption-ledger`; attach a tripwire to the ones that matter (for example "if monthly expenses exceed X for 2 months, re-run").
 
 ## Conventions to state in every answer
@@ -39,6 +39,11 @@ Starting cash; monthly income and expenses; horizon in months; expected income g
 
 ## Output
 The scenario table, the survival result, the single biggest vulnerability, the smallest verified fix, and the assumptions that must be re-checked. For an overall judgment use `verdict-format`, mapping: Cost of failure = depth of the worst surviving-scenario dip; Assumption fragility = how many growth/inflation inputs are unrecorded.
+
+## Exit path
+- **Missing input:** start cash, income, spending or horizon missing: ask for each; do not assume.
+- **Script problem:** if `cashflow.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** for anything that looks like advice on investments, tax or law, give the projection and the disclaimer, not a recommendation.
 
 ## Limits
 Deterministic scenarios, not probabilities. Monthly steps ignore intra-month timing. Investment return is modelled only as a constant `return_annual` on a positive balance; no taxes, fees, volatility or sequence risk (run a lower-return scenario instead). This is arithmetic for decisions, not financial advice; a licensed advisor should review large commitments.

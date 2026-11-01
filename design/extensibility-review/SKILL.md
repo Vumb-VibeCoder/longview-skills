@@ -37,5 +37,9 @@ A request to assess how easily a design accepts new features, providers, formats
 ## Output
 A table of change, likelihood with evidence, radius, class and decision; the list of speculative abstractions to remove; the contract-room decisions; the tripwires for deferred seams. For a verdict use `verdict-format` (Change tolerance carries the most weight).
 
+## Exit path
+- **Missing input:** no concrete future change given: ask for two or three likely ones; do not add extension points for imagined needs.
+- **Stop or hand off:** if no anticipated change needs the extension point, recommend none.
+
 ## Limits
 Likelihood estimates are judgments; the evidence column is what keeps them honest. Radius predictions from reading code can miss dynamic coupling (reflection, configuration, shared databases).

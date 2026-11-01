@@ -23,14 +23,15 @@ Testing showed most failures were routing failures: money questions answered wit
 ## Routing table
 | Request looks like | Primary skills | Add only if |
 |---|---|---|
-| Write or change code that will live on | `line-durability`, `myopia-patterns` | money/data/security: `assumption-ledger`; hard to undo: `reversibility-check` |
+| Write or change code that will live on | `line-durability`, `myopia-patterns` | money/data: `assumption-ledger`; auth, secrets, personal data, public endpoint: `security-durability`; hard to undo: `reversibility-check`; deploy, migrate or delete: `rollback-path` |
 | Review a function, file or snippet | `line-durability`, `myopia-patterns` | class C/D: `verdict-format` |
+| Review or write tests, flaky or slow suite, "tests pass so it is fine" | `test-durability` | before a refactor: `refactor-planner`; debt: `debt-ledger` |
 | Audit a repo, take over a project, "rewrite or patch?" | `codebase-longevity-audit` | fixes pile up: `logic-myopia-audit`; debt: `debt-ledger`; plan needed: `refactor-planner` |
 | Where code should live, cycles, coupling, split/merge | `module-boundary-review` | `change-injection` to measure |
 | Add, upgrade or choose a library or vendor | `dependency-risk` | lock-in: `reversibility-check` |
 | "Should we add X (plugin, abstraction, config)?", "can we add X easily?" | `extensibility-review`, `change-vectors` | torn or costly: `council-protocol`; class A/B: TEMPORARY IS ENOUGH only |
 | Design or review a service, data model, API, pipeline, integration | `system-design-longevity`, `failure-and-scale-modes` | one-way doors: `reversibility-check`, `adr-writer`; no design text: INSUFFICIENT EVIDENCE |
-| Choose a database, schema, public API, vendor, anything hard to undo | `reversibility-check`, `three-horizon-map` | `adr-writer` to record |
+| Choose a database, schema, public API, vendor, anything hard to undo | `reversibility-check`, `three-horizon-map` | `rollback-path` for the way back; `adr-writer` to record |
 | "What are we assuming?", result looks too certain | `assumption-ledger` | `assumption-tripwires` for risky ones |
 | Shortcut, quick fix, technical debt | `debt-ledger` | `refactor-planner` for payoff |
 | Turn a decision into a CI rule | `fitness-functions` | `adr-writer` |
@@ -50,7 +51,7 @@ Testing showed most failures were routing failures: money questions answered wit
 ## Mandatory header (first lines of every routed answer)
 ```
 ROUTE: <skill1 -> skill2 -> ...> | skipped: <skill: reason; ...>
-CLASS: <A|B|C|D> [PROVISIONAL] | Components escalated: <none | list>
+CLASS: <A|B|C|D> [PROVISIONAL] | Components escalated: <none | component -> class, ...>
 ```
 No header means not routed. For class A/B the ROUTE line is `horizon-fit` only.
 
@@ -64,6 +65,11 @@ No header means not routed. For class A/B the ROUTE line is `horizon-fit` only.
 | Skill named but not applied | List only skills whose output you used; unrun scripts get `NOT MEASURED` |
 | Unstated fact assumed (internal vs public, one state vs many) | Give both branches, name the deciding fact |
 | Code delivered without saying whether it ran | End with `Not run.` or the test result |
+
+## Exit path
+- **Missing input:** request too vague to route: ask one question, or route to `horizon-fit` only.
+- **Script problem:** if `route.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if a chosen skill turns out not to apply, drop it, say so in the ROUTE line, and carry on.
 
 ## Limits
 `route.py` is a keyword heuristic; its cases (`templates/route_cases.json`) cover only what has been written. Add a case whenever a request is routed wrongly.

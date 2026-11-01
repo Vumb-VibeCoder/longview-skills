@@ -31,5 +31,9 @@ Designing or reviewing a system, schema, API or pipeline. Run `horizon-fit` firs
 ## Output
 The one-way-door list with ADR references, the boundaries and the change each protects against, the evolution path for data and contracts, the assumptions and tripwires, and the verdict.
 
+## Exit path
+- **Missing input:** no design or requirements: ask for them; do not review an idea that was never described.
+- **Stop or hand off:** for a prototype (class A/B) list only the one thing that must not be thrown away, such as the data model.
+
 ## Limits
 A design cannot be verified without running it; this review finds structural risk, not performance or correctness. It assumes the stated horizon; if the horizon changes, re-run it.

@@ -43,5 +43,10 @@ Boundaries worth adding: only with a stated justification from step 5
 Coupling & Change tolerance scores with evidence (verdict-format)
 ```
 
+## Exit path
+- **Missing input:** no code tree: ask for one; do not infer boundaries from folder names alone.
+- **Script problem:** if `cochange.py`, `module_graph.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** without git history, skip co-change and say the coupling view is static only.
+
 ## Limits
 Sees static imports only. Coupling through databases, queues, HTTP, reflection, dynamic imports, build config or tests is invisible to the graph (the co-change step is the partial remedy). Test directories are skipped by default. JS/TS import resolution is approximate (relative imports only). Co-change reflects past habits and shrinks right after a reorganisation.

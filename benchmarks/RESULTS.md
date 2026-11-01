@@ -15,8 +15,13 @@ Two kinds of benchmark exist in this repo:
 | 1 | T1-T6 | 30/72 | 46/72 | +16 | v3 |
 | 2 | T1-T6 (same tasks, patched skills) | 33/72 | 64/72 | +31 | v3.1 |
 | 3 | S1-S6 (new tasks) | 32/72 | 62/72 | +30 | v3.1 |
+| 4 (run 1) | H1-H6 (new, harder; not used to tune) | 38/72 | 59/72 | +21 | v3.2 |
+| 4 (run 2) | H1-H6 (same tasks, fresh chats) | 37/72 | 67/72 | +30 | v3.2 |
+| 4 (run 3, **Sonnet 5.5 low**) | H1-H6 (same tasks) | 39/72 | 64/72 | +25 | v3.13 with the class-split and line-number patch |
 
 Round-3 per task (A / B): S1 6/11, S2 5/12, S3 2/12, S4 6/8, S5 7/9, S6 6/10.
+
+Round 4 mean over two runs: A 37.5, B 63, effect +25.5 (about +13.5 without the Format criterion, which favors B by construction). Per-task scores and raw answers: `results/round4/`. Run 3 used a different model (Sonnet 5.5, low effort) and the patched skills: gap +25, so the effect is not specific to Haiku. Both patched errors were gone in run 3 (class split in H1, line numbers counted from the snippet), but the patch was written after seeing these same tasks, so that is not independent proof.
 
 ## What the rounds showed
 - **Round 1:** gains came from judgment tasks (stopping, refusing, missing evidence). Money tasks showed almost no skill effect because the finance skills were not triggered. The with-skill answers often omitted the class line.
@@ -24,8 +29,11 @@ Round-3 per task (A / B): S1 6/11, S2 5/12, S3 2/12, S4 6/8, S5 7/9, S6 6/10.
 - **Round 2:** every with-skill answer carried the header and used the right skills. Part of the gain is likely tuning to these exact tasks, because they were also the routing test cases.
 - **Round 3:** new tasks gave nearly the same effect, so the gain was not only memorisation. Remaining weaknesses: skills named in ROUTE but not applied (S4), an unstated assumption chosen silently (S5), code delivered without saying it was not run (S1). Patch v3.2 targets these three.
 
+- **Round 4:** hard tasks written for small models. The largest gaps were H4 (A answered "No" to a rewrite question without evidence, B returned INSUFFICIENT EVIDENCE) and H2 (A gave no `file:line` or verdict). Repeated B errors: the whole demo classed C when one component was escalated, and line numbers offset by 13. Both were patched afterwards in `horizon-fit`, `AGENTS.md` and the line-number rule; the patch was not re-measured.
+- **Across rounds:** the effect is positive in all four rounds (+16 to +31) on two models, so the direction is consistent. Rounds 2 and 3 B scores are higher than round 1 partly because the skills were patched between rounds.
+
 ## Caveats (read before quoting any number)
-- One run per task, six tasks per round, one model. Treat the effect as an indicator, not proof.
+- One run per task in rounds 1 to 3 (two in round 4), six tasks per round, one model. Treat the effect as an indicator, not proof.
 - The judge saw the with-skill format and may favour it; scores should be spot-checked by a second judge or a human.
 - The A chat in round 3 was not fresh (it referred to an earlier answer), so A may be slightly inflated.
 - The judge also wrote the rubric and the tasks.

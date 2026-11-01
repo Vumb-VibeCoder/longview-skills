@@ -34,5 +34,9 @@ Class C/D decisions and verdicts. Class A/B with no escalator: skip. Run after `
 ## Output
 The table above, the tipping points with their observable signs, and the line `now <V> | 1 year <V> | 5 years <V>`.
 
+## Exit path
+- **Missing input:** no sense of the 1 and 5 year picture: state the assumption you used for each horizon.
+- **Stop or hand off:** if the verdict is the same at all three horizons, say so and stop.
+
 ## Limits
 The 5-year column is scenario thinking. State the confidence and the main scenario it depends on.

@@ -1,6 +1,6 @@
 ---
 name: myopia-patterns
-description: Library of short-sightedness patterns (M01-M11) distilled from real reverted or repeatedly patched commits, including the over-engineering pattern M10. Use as a lookup when reviewing code, designs or logic to name the pattern, its signs and its smallest fix.
+description: Library of short-sightedness patterns (M01-M12) distilled from real reverted or repeatedly patched commits, including the over-engineering pattern M10. Use as a lookup when reviewing code, designs or logic to name the pattern, its signs and its smallest fix.
 metadata:
   domain: core
   status: READY
@@ -26,11 +26,16 @@ For each finding, cite the pattern ID, the evidence (`file:line`), the concrete 
 | M09 | Unexplained decision | odd structure with no stated reason | ADR or a "why" comment | the reason is obvious from names and context |
 | M10 | Premature abstraction (over-engineering) | interface/class/layer with a single implementation and no concrete second use | delete until a second implementation exists | a public API or plugin boundary with a stated external need |
 | M11 | Extended present | model or parameter assumes today's value will persist | scenarios plus a value range | the value is fixed by law or physics |
+| M12 | Imprecise money | prices, totals, tax or balances computed with binary floats | `Decimal` or integer minor units, one rounding rule | a display-only estimate that is never stored, summed or compared |
 
 M10 is the over-engineering pattern; it matters as much as the short-sighted ones. A review that only finds under-engineering is biased.
 
 ## Admission rule for new patterns
 A pattern is added only when at least 2 cases in `benchmarks/cases/` confirm it, and it must carry a "Do NOT flag when" entry.
+
+## Exit path
+- **Missing input:** no case to match: do not apply patterns by name alone.
+- **Stop or hand off:** if nothing matches, say `no pattern matched`; do not stretch a pattern to fit.
 
 ## Limits
 Patterns are lenses, not verdicts. A match without evidence of consequence is a question to ask, not a defect to report.

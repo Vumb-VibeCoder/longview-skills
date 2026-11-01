@@ -18,8 +18,36 @@ def compile_formula(src, names):
             raise ValueError(f"unknown name in formula: {node.id}")
         if isinstance(node, ast.Call) and not (isinstance(node.func, ast.Name) and node.func.id in FUNCS):
             raise ValueError("only min/max/abs/sqrt/log/exp calls are allowed")
-    code = compile(tree, "<formula>", "eval")
-    return lambda env: eval(code, {"__builtins__": {}}, {**FUNCS, **env})
+    return lambda env: _ev(tree.body, env)
+
+MAX_POW = 1000.0  # refuse absurd exponents/bases instead of hanging on e.g. 9**9**9**9
+
+def _ev(n, env):
+    """Tiny evaluator for the whitelisted syntax only (no eval)."""
+    if isinstance(n, ast.Constant):
+        if isinstance(n.value, bool) or not isinstance(n.value, (int, float)):
+            raise ValueError("only numeric constants are allowed")
+        return n.value
+    if isinstance(n, ast.Name):
+        return FUNCS[n.id] if n.id in FUNCS else env[n.id]
+    if isinstance(n, ast.UnaryOp):
+        v = _ev(n.operand, env)
+        return -v if isinstance(n.op, ast.USub) else +v
+    if isinstance(n, ast.BinOp):
+        a, b = _ev(n.left, env), _ev(n.right, env)
+        op = n.op
+        if isinstance(op, ast.Add): return a + b
+        if isinstance(op, ast.Sub): return a - b
+        if isinstance(op, ast.Mult): return a * b
+        if isinstance(op, ast.Div): return a / b
+        if isinstance(op, ast.Mod): return a % b
+        if isinstance(op, ast.Pow):
+            if abs(b) > MAX_POW or abs(a) > 1e12:
+                raise ValueError("exponent or base too large")
+            return float(a) ** b
+    if isinstance(n, ast.Call):
+        return _ev(n.func, env)(*[_ev(x, env) for x in n.args])
+    raise ValueError(f"disallowed syntax: {type(n).__name__}")
 
 def breakeven(f, env, name, thr, lo, hi):
     a, b = lo, hi
@@ -34,15 +62,25 @@ def breakeven(f, env, name, thr, lo, hi):
         else: a, fa = mid, fm
     return (a + b) / 2
 
+def die(msg):
+    print("ERROR: " + msg, file=sys.stderr); sys.exit(2)
+
 def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
-    m = json.load(open(sys.argv[1]))
-    inputs, thr = m["inputs"], m.get("threshold", 0.0)
-    for k, v in inputs.items():
-        if not (v["low"] <= v["base"] <= v["high"]):
-            print(f"ERROR {k}: need low <= base <= high"); sys.exit(2)
-    f = compile_formula(m["formula"], set(inputs))
+    try:
+        with open(sys.argv[1], encoding="utf-8") as fh:
+            m = json.load(fh)
+        inputs, thr = m["inputs"], m.get("threshold", 0.0)
+        for k, v in inputs.items():
+            if not (v["low"] <= v["base"] <= v["high"]):
+                die(f"{k}: need low <= base <= high")
+        f = compile_formula(m["formula"], set(inputs))
+        run_model(f, inputs, thr)
+    except (OSError, ValueError, KeyError, TypeError, SyntaxError, ZeroDivisionError, OverflowError) as e:
+        die(f"{type(e).__name__}: {e}")
+
+def run_model(f, inputs, thr):
     base_env = {k: v["base"] for k, v in inputs.items()}
     base = f(base_env)
     print(f"base output = {base:.4g}   threshold = {thr}   base side = {'above' if base >= thr else 'below'}")

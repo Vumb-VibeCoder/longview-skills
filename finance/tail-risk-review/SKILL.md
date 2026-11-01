@@ -30,5 +30,10 @@ Any exposure with potential for large loss: investments, leverage, concentrated 
 ## Output
 Ruin line, tail statistics with their flags, the stress case, the multiplier check, the ruin-test result (PASS / FAIL) and the smallest change that makes it pass. If a full score is needed use `verdict-format` (Cost of failure and Reversibility carry the most weight here).
 
+## Exit path
+- **Missing input:** fewer than 10 observations or no leverage figures: ask for more data and do not estimate tail loss.
+- **Script problem:** if `tail_stats.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if the person describes distress or an urgent loss, answer the immediate question and suggest a qualified adviser.
+
 ## Limits
 Historical statistics describe the past; a regime that never occurred is not in the data. Normal-model comparisons use fixed z-values for common alphas only (0.01, 0.025, 0.05, 0.10). This is a risk-screening aid, not investment advice or a guarantee of safety.

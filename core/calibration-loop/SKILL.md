@@ -28,5 +28,10 @@ After any class C/D evaluation that states something checkable about the future 
 - Could someone else resolve this prediction without asking me what I meant?
 - Is this prediction one a different verdict would have contradicted? (If not, it carries no information.)
 
+## Exit path
+- **Missing input:** no outcome yet: leave the prediction open and set a check date; do not score it early.
+- **Script problem:** if `calibration_report.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if there are fewer than about 10 scored predictions, report counts only; a Brier score on tiny data misleads.
+
 ## Limits
 Needs at least 20 resolved predictions, and at least 5 per bucket, before calibration claims mean anything. It measures forecasting quality, not whether a decision was good. Predictions about outcomes the decision itself influenced need care.

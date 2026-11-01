@@ -5,7 +5,7 @@ Input: JSON array or one number per line."""
 import json, sys, math
 
 def load(p):
-    t = open(p).read().strip()
+    t = open(p, encoding="utf-8").read().strip()
     try:
         d = json.loads(t)
         if isinstance(d, list): return [float(x) for x in d]
@@ -55,4 +55,7 @@ def main():
     print("FLAGS: " + ("; ".join(flags) if flags else "none"))
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (OSError, ValueError, KeyError, TypeError, IndexError) as _e:  # bad input -> exit 2, not a traceback
+        print(f"ERROR: {type(_e).__name__}: {_e}", file=sys.stderr); sys.exit(2)

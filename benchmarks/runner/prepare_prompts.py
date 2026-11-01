@@ -13,7 +13,7 @@ Question: is this change likely to be reverted or patched within a few weeks bec
 oversight (fragile assumption, symptom patching, tight coupling, swallowed errors, etc.)?
 
 Answer with ONLY a single-line JSON object:
-{"flag": true|false, "pattern": "M01..M11 or null", "reason": "<=2 sentences citing specific lines"}
+{"flag": true|false, "pattern": "M01..M12 or null", "reason": "<=2 sentences citing specific lines"}
 Do not flag (flag=false) if the change is sound. Do not raise alarms indiscriminately."""
 
 

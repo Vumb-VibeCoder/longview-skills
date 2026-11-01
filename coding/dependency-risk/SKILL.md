@@ -52,5 +52,10 @@ MUST ACT items: ...
 UNVERIFIED items and how to verify them: ...
 ```
 
+## Exit path
+- **Missing input:** no manifest or lockfile: say so and list what to provide; do not rate from memory.
+- **Script problem:** if `dep_scan.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** a vendor that cannot be checked offline gets `UNVERIFIED`, not a guessed score.
+
 ## Limits
 Offline scan sees only declared direct dependencies; transitive risk needs the ecosystem audit tool. Health depends on external facts that change: every health rating carries a date and expires with its tripwire. Monorepo path-based dependencies are reported as SOURCE_URL and must be judged by hand.

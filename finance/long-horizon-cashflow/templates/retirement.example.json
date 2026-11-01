@@ -12,7 +12,7 @@
     {
       "name": "withdrawals indexed to 3%",
       "expense_growth_annual": 0.03,
-      "must_survive": false
+      "must_survive": true
     },
     {
       "name": "returns 2 points lower",

@@ -30,5 +30,10 @@ A choice between 2-5 concrete options where the future is uncertain and the down
 ## Output
 The matrix with regrets, the three rule results, any CONFLICT with the deciding consideration stated, the sensitivity result, and the review trigger.
 
+## Exit path
+- **Missing input:** payoffs or scenario probabilities missing: ask, or run with equal weights and say so.
+- **Script problem:** if `regret.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if expected value and minimax regret disagree, show both and ask which loss the person cannot absorb.
+
 ## Limits
 The result is only as good as the scenarios and payoffs; the tool cannot see an option or scenario you did not list. Regret and expected value are different value systems, so the skill reports both instead of choosing for you. Not financial or legal advice.

@@ -33,5 +33,10 @@ Changing a component used by more than one caller, adding props, renaming, or re
 ## Output
 The prop diff, the manual-check list, each breaking change with its compatibility path and version impact, and the CI check added.
 
+## Exit path
+- **Missing input:** no old and new API to compare: ask for both versions.
+- **Script problem:** if `props_diff.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if consumers are unknown, treat every public prop as breaking.
+
 ## Limits
 `props_diff.py` is regex-based: it reads `interface X {}` or `type X = {}` blocks with simple members, and may miss props from `extends`, intersections, generics or imported types. Treat a clean result on a complex type as unverified. It does not cover Vue, Svelte or non-TypeScript components.

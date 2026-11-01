@@ -53,5 +53,10 @@ Result: CLEAR | PATCHY | OPAQUE (<pct>%, <n> confident-wrong)
 Smallest fixes in priority order
 ```
 
+## Exit path
+- **Missing input:** no fresh session available: write `NOT MEASURED: blind read` and fall back to `line-durability` on the hardest file.
+- **Script problem:** if `prepare_blind_copy.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if the fresh reader fails the fixed questions, record the score and stop; do not coach the reader.
+
 ## Limits
 An AI reader approximates but is not a human reader; it measures how explicit the code is, not how elegant. Results depend on the question set and on the author's ground truth being honest. One run is a sample, not a guarantee.

@@ -22,7 +22,7 @@ Run `horizon-fit` first. If its result is class A/B with no escalator, the verdi
 | Operability | failures are silent, no tests | partial tests or logs | tests plus logs, slow to localise | failures are detected fast and localised |
 | Cost of failure | failure loses money/data/safety | recoverable but costly loss | bounded, recoverable loss | only minor time lost |
 
-**Evidence rule:** a score needs evidence (code `file:line`, a measurement, a named assumption). A dimension with no evidence scores 0 and is marked `NO EVIDENCE`.
+**Evidence rule:** a score needs evidence (code `file:line`, a measurement, a named assumption). Line numbers count lines from the first line of the code as it was given to you (that line is 1), never from the surrounding message or file; when the code has no line numbers, say `snippet:line` and count it yourself. A dimension with no evidence scores 0 and is marked `NO EVIDENCE`.
 
 ## Decision rule (apply in this order, first match wins)
 1. Class A/B with no escalator: **TEMPORARY IS ENOUGH**.
@@ -34,6 +34,8 @@ Run `horizon-fit` first. If its result is class A/B with no escalator, the verdi
 7. Otherwise (a zero that cannot be fixed locally): **REWRITE**.
 
 Rule 3 outranks rule 4 on purpose: a system that scores 14/18 but cannot absorb change AND is tightly coupled is still a REWRITE.
+
+**REWRITE gate (for something that already exists and runs).** Rules 3 and 7 produce a REWRITE *candidate*. Issue REWRITE only if all three hold, as in `codebase-longevity-audit`: (a) rewrite cost is below total net interest x horizon, with ranges; (b) behaviour can be preserved (characterization tests or a precise spec exist or can be written first); (c) a migration path exists that does not freeze feature work. If any fails, output **REINFORCE** instead and name the failing condition(s) in the evidence. For a design not yet built, the gate does not apply.
 
 ## Headline horizon
 The headline verdict is computed for the horizon implied by the class: C = 1 year, D = 5 years. If `three-horizon-map` was run, also print the per-horizon line.
@@ -55,8 +57,13 @@ Use when rule 2 fires, or when the thing to review was not provided at all. Prin
 VERDICT: INSUFFICIENT EVIDENCE | Class: <class> [PROVISIONAL]
 Missing: <numbered list of exact inputs, each with the dimension it feeds>
 Why it matters: <one line naming the escalator, if any>
+Fix now: <controls that are cheap and safe without the missing evidence, for example idempotency keys and timeouts after a double charge | none>
 ```
-Do not rank speculative risks. Questions to answer are allowed; findings are not.
+When the evidence is missing for a rewrite-or-keep call but an incident points at a known control gap (money, data), name that control under `Fix now`; it is not a verdict. Do not rank speculative risks. Questions to answer are allowed; findings are not.
+
+## Exit path
+- **Missing input:** three or more dimensions without evidence: output INSUFFICIENT EVIDENCE with the list to gather.
+- **Stop or hand off:** if two skills disagree, show both scores, apply the decision rule once, and name the disagreement.
 
 ## Limits
 The scale is a consistency tool, not truth. If two reviewers differ, compare evidence, not numbers.

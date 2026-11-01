@@ -16,7 +16,7 @@ Writing or reviewing code of class C/D (run `horizon-fit` first). For class A/B 
 The code, plus its context: who calls it, where input data comes from, what happens on failure. If context is missing, ask.
 
 ## Procedure
-1. **Measure (Python):** `python scripts/scan_line_risks.py <path>`. It lists CANDIDATES for M01, M03, M04, M05, M06, M08 and TODO notes. For other languages, skip the script and apply step 2 by reading; say the scan was not run.
+1. **Measure (Python):** `python scripts/scan_line_risks.py <path>`. It lists CANDIDATES for M01, M03, M04, M05 (including network calls with no timeout), M06, M08, M12 (float arithmetic on money-named values) and TODO notes. For other languages, skip the script and apply step 2 by reading; say the scan was not run.
 2. **Read each candidate and the surrounding code**, asking five questions:
    1. Is a value, string, path, currency or URL hard-coded in logic? (M01)
    2. What does it assume about data size, ordering, timing or environment? (M05, M06)
@@ -35,8 +35,13 @@ The code, plus its context: who calls it, where input data comes from, what happ
 
 ## Output
 | Location | Pattern | Consequence | Severity | Smallest fix |
-Every row needs `file:line` (use `snippet:line` when no file name exists) and a pattern ID (M01-M11) from `myopia-patterns`; a row without both is a question, not a finding. Do not flag true constants (0, 1, 100 percent, HTTP 200).
+Every row needs `file:line` (use `snippet:line` when no file name exists) and a pattern ID (M01-M12) from `myopia-patterns`; a row without both is a question, not a finding. Do not flag true constants (0, 1, 100 percent, HTTP 200). Count lines from the first line of the code as it was given to you (that line is 1), never from the surrounding message or file; when the code has no line numbers, say `snippet:line` and count it yourself.
 Plus: candidates found / confirmed / discarded, and what was not examined.
+
+## Exit path
+- **Missing input:** no code supplied: ask for the file; do not review from a description.
+- **Script problem:** if `scan_line_risks.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** for throwaway code (class A/B) stop after the correctness check.
 
 ## Limits
 The scanner catches syntax-level patterns in Python only; it flags candidates, not defects. Logic errors, business assumptions and security flaws need reading and domain knowledge.

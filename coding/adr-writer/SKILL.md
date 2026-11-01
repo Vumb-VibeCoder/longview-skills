@@ -41,5 +41,10 @@ Do **not** write one for CHEAP two-way decisions, style choices, or anything a c
 ## Output
 The ADR file(s), the lint result, and a one-line index entry (`ADR-NNNN | title | status`).
 
+## Exit path
+- **Missing input:** no decision, alternatives or consequences given: ask for them; do not invent alternatives.
+- **Script problem:** if `adr_lint.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if the decision is cheap to reverse (`reversibility-check`), write a three-line note instead of a full ADR.
+
 ## Limits
 Cannot recover reasoning nobody recorded: when reconstructing an old decision, mark Context as "reconstructed from code and history" and list what is unknown. The linter checks structure, not whether the reasoning is sound.

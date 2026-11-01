@@ -1,1 +1,0 @@
-{"id":"c001","date":"2026-11-01","prediction":"Adding multi-currency requires edits in >=5 files","confidence":0.7,"resolution":"count files in the merged PR that adds a second currency","check_on":"2027-02-01","outcome":null,"notes":"made during billing review"}

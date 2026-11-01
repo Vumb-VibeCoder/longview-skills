@@ -29,5 +29,10 @@ A decision rests on a calculation with uncertain inputs. Run `horizon-fit` first
 ## Output
 The ranked table, the flipping inputs, the break-even list with distance from base, the combined-low check, and the single research action with the highest value.
 
+## Exit path
+- **Missing input:** no formula or ranges: ask for them; do not make up low and high values.
+- **Script problem:** if `sensitivity.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if the decision does not flip within the stated ranges, say it is robust to single-input moves only.
+
 ## Limits
 Linear scanning of independent inputs; correlations between inputs are ignored. The formula is only as good as its structure: a missing term (a cost nobody listed) is invisible to this skill, so ask for it explicitly. Not financial advice.

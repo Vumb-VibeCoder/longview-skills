@@ -4,7 +4,7 @@ Language: English only. A skill is READY only when its text is in English, its p
 
 | Skill | Status | Notes |
 |---|---|---|
-| core/skill-router | READY (v3.1) | route.py + 31 regression cases (tests were written after seeing early failures, so the pass rate is not an unbiased accuracy); routing table covers all skills (validator-enforced); mandatory ROUTE/CLASS header in AGENTS.md |
+| core/skill-router | READY (v3.1) | route.py + 38 regression cases (tests were written after seeing early failures, so the pass rate is not an unbiased accuracy); routing table covers all skills (validator-enforced); mandatory ROUTE/CLASS header in AGENTS.md |
 | core/* (10 others): horizon-fit, verdict-format, myopia-patterns, assumption-ledger, assumption-tripwires, council-protocol, three-horizon-map, calibration-loop, change-vectors, reversibility-check | READY (v3, English) | unified ledger schema (confidence, impact, expiry, owner); tripwire_check.py rewritten and tested; calibration_report.py added and tested; council formula corrected (benefit = P x (C_late - C_prepared) vs C_prep + C_carry) |
 | coding/module-boundary-review | READY (v3) | scripts: module_graph.py, cochange.py (tested) |
 | coding/dependency-risk | READY (v3) | script: dep_scan.py (tested) |
@@ -45,3 +45,34 @@ From round 3: ROUTE lists only skills actually applied (visible trace required),
 
 ## v3.3 clarity pass
 Found by review: (1) class horizons disagreed (change-vectors said 3-5 years for D, verdict-format 5): now defined once in horizon-fit with the LOW/MEDIUM/HIGH probability scale, referenced elsewhere; (2) cashflow.py could not model investment return, so the most common question (will savings last) had to be computed by hand: added return_annual, return_compounding (mandatory, so the convention is explicit) and expense_indexing, plus templates/retirement.example.json and a validator regression against the hand calculation; (3) AGENTS.md process list read as mandatory for every request: now labelled the maximum; (4) exit-path block was three lines in AGENTS.md and four in horizon-fit: aligned. Not re-tested with an AI.
+
+## v3.4 patch (self-audit with the skills' own method)
+- `cashflow.py`: rejects unknown model/scenario keys (a typo like `income_shok` used to be ignored and gave a false OK); input errors exit 2, a failed `must_survive` scenario exits 1. The copy in `scenario-stress-test` was stale (ignored `return_annual`) and is now identical.
+- `sensitivity.py`: no more `eval`; exponent limit; clean exit 2 on bad formulas. `regret.py`, `tail_stats.py`, `check_rules.py`, `adr_lint.py`, `calibration_report.py`: no tracebacks on unreadable input.
+- All text `open()` calls now pass `encoding="utf-8"` (not tested on Windows).
+- `verdict-format`: REWRITE gate added so it no longer contradicts `codebase-longevity-audit`.
+- `tools/validate_repo.py`: same-named scripts must be identical; `dist/` must match sources.
+- New `tests/test_regression.py` (17 tests; spot mutation-checked on 4 deliberate breaks). Run: `python3 tests/test_regression.py`.
+- Known and accepted: the router still does well mainly on phrases it was written around (4/12 on fresh questions in the audit).
+
+## v3.5 additions
+- New `coding/rollback-path`: every deploy, migration, delete or schema change gets a restore point, a way back, a trigger and a stated point of no return. Procedure and template only, no script.
+- Every skill has an `## Exit path` section; `AGENTS.md` has a shared "When something goes wrong" block. The validator enforces the section.
+- New `coding/security-durability` with `scan_security.py` (SEC01-SEC10 pattern rules, secrets masked in output) and a threat model template. First of the planned gaps: next are test quality and operability.
+- New `coding/test-durability` with `scan_tests.py` (TST01-TST09: no assertion, sleeps, network, clock and fixed dates, skips, unseeded randomness, mock-heavy files, private-member asserts) and a test plan template. Next planned: operability.
+
+## v3.6 additions
+- `benchmarks/git-history-miner/miner.py` v2: positives come from `git blame` on the fix's parent (the fix must rewrite lines the candidate introduced), housekeeping commits and non-code files are ignored, size window 3-400 added lines. On pallets/click: 499 -> 60 positives. Two regression tests (one mutation-checked). Labels not yet human-reviewed; no model-scored run exists.
+- Gaps found by running the process on a small order-total function (a live-shop example): `scan_security.py` now flags plain `http://` endpoints (SEC10, loopback and XML-namespace URLs excluded); `scan_line_risks.py` now flags network calls without a timeout (M05) and float arithmetic on money-named values (M12, new pattern in `myopia-patterns`). Heuristics: they find candidates and will miss aliased imports and money values with unusual names.
+- Human review of 20 mined positives on pallets/click (subject, fix and overlapping removed lines read; full diffs not read): 10 valid, 9 invalid, 1 unclear. Main false positives were doc/style/test-housekeeping fixes and reverts that touched a different commit's lines; the fix-subject and commit-subject filters were tightened afterwards (not re-reviewed). Still no model-scored run.
+- Router: code that makes network calls (requests.get, urlopen, fetch, http://) now suggests `security-durability`; two new routing cases (40 total).
+
+## Round 4 follow-up (small-model run, 2 runs, Haiku 5.5 medium; all rounds in `benchmarks/RESULTS.md`)
+Mean score A (no skill) 37.5/72, B (with skill) 63/72 (raw answers and per-task scores: `benchmarks/results/round4/`); without the Format criterion the gap is about +13.5. Judge was the author of the tasks, one model, two runs each: an indicator, not proof.
+Changes made from the repeated B errors: a throwaway with one escalated component is no longer printed as class C for the whole project (`horizon-fit` step 4 and the CLASS line); own-use scripts with no end date stay class B; line numbers count from the first line of the code as given. Not re-measured after these changes; they need a fresh task set.
+
+## v3.14 patch (after Sonnet 5.5 low run)
+- `long-horizon-cashflow`: reverse-stress thresholds must be rounded safely and re-run at the printed value (run 3 printed $1,576 and $952,077, both still ending below zero).
+- `verdict-format`: INSUFFICIENT EVIDENCE gets a `Fix now` line for known control gaps (run 3 never named idempotency in H4).
+- `horizon-fit`: a secret goes in an environment variable even in class B (run 3 left the H6 webhook in the file).
+- README: badges, shorter intro, status text updated to four rounds. Not re-measured.

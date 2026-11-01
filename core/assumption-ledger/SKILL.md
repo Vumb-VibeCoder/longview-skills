@@ -46,5 +46,9 @@ After `horizon-fit` returns class C/D (or an escalated component). Also whenever
 ## Output
 The ledger as JSON (template format) plus a short table of the HIGH-impact entries and which ones need tripwires.
 
+## Exit path
+- **Missing input:** nothing to analyse: ask what the design, plan or code is.
+- **Stop or hand off:** if every assumption is low impact, say so and stop; a long ledger is not the goal.
+
 ## Limits
 Finds only assumptions visible in the material and the model's knowledge. Assumptions about things it does not know exist are invisible: ask a domain owner to review the ledger.

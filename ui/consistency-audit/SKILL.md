@@ -33,5 +33,10 @@ A product with several screens, authors or years of history; before adopting or 
 ## Output
 The inventory table (intent, forms found, winner, class, fix cost), the scanner before and after, the prioritised list, and the rules added to the style guide.
 
+## Exit path
+- **Missing input:** no UI files or screens: ask for them.
+- **Script problem:** if `ui_scan.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if there is no token set, recommend `design-token-discipline` first and stop.
+
 ## Limits
 Only screens and files actually examined are covered; state which. Taste differences are not findings: every finding needs two concrete locations that show the divergence. The scanner sees code, not rendered pixels.

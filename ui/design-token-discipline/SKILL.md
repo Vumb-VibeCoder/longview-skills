@@ -30,5 +30,10 @@ Writing or reviewing styles, themes or a component library. Run `horizon-fit` fi
 ## Output
 Before and after counts per category, the token layers with the merge decisions, the lint or CI rule added, and the result of the one-token-change test. For a verdict use `verdict-format` (Change tolerance carries the most weight).
 
+## Exit path
+- **Missing input:** no style files: ask for them.
+- **Script problem:** if `ui_scan.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if a token set does not exist yet, propose a minimal one and stop; do not rewrite every value.
+
 ## Limits
 The scanner is regex-based: it does not resolve CSS-in-JS built dynamically, values inside images or SVG files, or runtime-computed styles; it may count literals in generated code. Counts guide judgment; they are not a pass/fail standard by themselves.

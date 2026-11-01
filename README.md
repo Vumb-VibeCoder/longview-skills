@@ -1,46 +1,83 @@
 # longview-skills
 
-Skills that make an AI **avoid short-sightedness**: judging whether a line, a module, a whole codebase, a financial plan, a design or a UI will hold up over its real lifetime, and knowing when long-term thinking is **not** needed.
+![CI](https://github.com/Vumb-VibeCoder/longview-skills/actions/workflows/ci.yml/badge.svg)
+![License: MIT](https://img.shields.io/badge/license-MIT-blue)
+![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
+![Skills: 37](https://img.shields.io/badge/skills-37-8A2BE2)
+![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
+![Status: working draft](https://img.shields.io/badge/status-working%20draft-orange)
+![Works with: Claude Code, claude.ai, AGENTS.md](https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20claude.ai%20%7C%20AGENTS.md-D97757)
 
-## What makes it different
+37 skills that make an AI assistant ask two questions before it touches your code, design or budget: will this still hold up in a few years, and does it need to?
+
+Assistants tend to fail in one of two directions. They patch the quick way, or they build a platform nobody asked for. These skills try to stop both. A throwaway script stays a throwaway script. A billing module that will outlive three teams gets real review. The same method also covers system design, UI and personal or business money.
+
+## What's inside
+
 | Idea | Where |
 |---|---|
-| Benchmark from git history (real answers) | `benchmarks/` |
-| Inject changes, measure blast radius | `coding/change-injection/` |
-| Assumptions with tripwires and expiry | `core/assumption-tripwires/` |
-| Three-role council against both short-sightedness and over-engineering | `core/council-protocol/` |
-| Technical debt with principal, interest and breakeven | `coding/debt-ledger/` |
-| Evidence-scored verdicts with a fixed decision rule | `core/verdict-format/` |
-| Router: right skills per request, mandatory ROUTE/CLASS header, regression-tested | `core/skill-router/` |
+| Decide how long a thing needs to live before judging it | `core/horizon-fit` |
+| Pick which skills apply, and which to skip | `core/skill-router` |
+| One verdict format with scores, evidence and a fixed decision rule | `core/verdict-format` |
+| Track assumptions with owners, expiry dates and tripwires | `core/assumption-tripwires` |
+| Review from three angles: builder, maintainer, minimalist | `core/council-protocol` |
+| Technical debt as principal, interest and break-even | `coding/debt-ledger` |
+| Secrets, untrusted input, least privilege, data kept | `coding/security-durability` |
+| Tests that stay trustworthy for years: no rot, no flakiness | `coding/test-durability` |
+| A way back for every change: restore point, kill switch, backups | `coding/rollback-path` |
+| Inject a change and measure how far it spreads | `coding/change-injection` |
+| Mine a repo's git history for real "this got patched or reverted" cases | `benchmarks/` |
 
-## See it work
-`EXAMPLE.md` walks one real function through the skills, with real script output and the verdict arithmetic.
+Skills live in five folders: `core/` (11), `coding/` (14), `finance/` (5), `design/` (3) and `ui/` (4). Each one is a folder with a `SKILL.md` and, where something can be measured, a `scripts/` and `templates/` folder.
 
-## Layout
-`core/` (11 skills, every domain; `skill-router` runs first) - `coding/` (11) - `finance/` (5) - `design/` (3) - `ui/` (4). Each skill is a folder with `SKILL.md`, and optional `scripts/` and `templates/`. `dist/` holds one upload-ready zip per skill.
+`EXAMPLE.md` walks a single function through the whole process with real script output.
 
 ## Install
-- **claude.ai:** upload each zip from `dist/` at Settings > Capabilities > Skills.
-- **Claude Code:** copy the skill folders into `.claude/skills/`.
 
-## Use
-1. Give the AI `AGENTS.md` at the start of a session (or put it in the project's instruction file).
-2. Ask when needed: "Apply `coding/line-durability` to this file."
-3. Run the measuring scripts (Python 3.10+, standard library only). Every script lives inside its skill:
-```
+**Claude Code:** copy the skill folders you want into `.claude/skills/`.
+
+**claude.ai:** upload the zips from `dist/` under Settings > Capabilities > Skills. There is one zip per skill.
+
+For other assistants, put `AGENTS.md` in the project's instruction file and point the assistant at the skill folders.
+
+## Usage
+
+1. Give the assistant `AGENTS.md` at the start of a session.
+2. Ask for a skill by name, for example "apply `coding/line-durability` to this file".
+3. Run the scripts directly if you want the numbers. They need Python 3.10+ and nothing else.
+
+```sh
 python coding/line-durability/scripts/scan_line_risks.py path/to/code
-python core/assumption-tripwires/scripts/tripwire_check.py core/assumption-tripwires/templates/assumptions.example.json
-python coding/debt-ledger/scripts/debt_calc.py --help
+python coding/debt-ledger/scripts/debt_calc.py --ledger coding/debt-ledger/templates/debt.example.json
 python finance/long-horizon-cashflow/scripts/cashflow.py finance/long-horizon-cashflow/templates/model.example.json
-python core/skill-router/scripts/route.py --test
-python core/skill-router/scripts/route.py "your request text"
+python core/skill-router/scripts/route.py "should I rewrite this module?"
 python benchmarks/git-history-miner/miner.py path/to/git/repo --out benchmarks/cases
 ```
-4. Check the repo after any edit: `python tools/validate_repo.py` (add `--build` to rebuild `dist/`).
-5. Measure whether the skills help with `benchmarks/` (see `benchmarks/README.md`). Judged A/B results so far: `benchmarks/RESULTS.md` (indicator only, not proof).
+
+Exit codes are consistent for the finance scripts: `0` means fine, `1` means a scenario marked `must_survive` failed, and `2` means the input was bad (unreadable file, missing field, unknown key).
+
+## Development
+
+```sh
+python tools/validate_repo.py           # structure, routing table, duplicate scripts, dist/ freshness
+python tools/validate_repo.py --build   # same checks, then rebuild dist/
+python tests/test_regression.py         # script behaviour
+```
+
+CI runs both on every push and pull request. See `CONTRIBUTING.md` before sending a change. If an assistant with these skills answers badly, please open a "wrong answer" issue: those become new benchmark tasks. Other files: `CHANGELOG.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`.
 
 ## Status
-See `STATUS.md`. READY means: English text, internally consistent procedure, bundled scripts executed on test inputs. It does **not** yet mean benchmark-proven; no benchmark results exist so far.
 
-## Warning
-The finance skills are risk-analysis frameworks, **not investment, tax or legal advice**.
+This is a working draft. I have read every skill for consistency and run every script on sample input. The effect on real assistant output is measured only lightly: `benchmarks/RESULTS.md` has four A/B rounds, six tasks each, one judge, run on Haiku 5.5 and (once) Sonnet 5.5. With the skills, the judged score was higher in every run, by 16 to 31 points out of 72. The judge also wrote the tasks and the rubric, and several skills were patched after seeing the tasks, so read those numbers as a hint, not as proof.
+
+The router's built-in test cases were written after its early failures, so passing them says little about new requests. `STATUS.md` lists the known gaps.
+
+The router matches English keywords only. Requests in other languages may fall back to `horizon-fit`.
+
+## Disclaimer
+
+The finance skills are frameworks for thinking about risk. They are not investment, tax or legal advice.
+
+## License
+
+MIT. See `LICENSE`.

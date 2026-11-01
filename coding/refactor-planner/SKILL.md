@@ -45,5 +45,10 @@ The findings with evidence, the debt ids involved, the test situation, and the r
 ## Output
 The plan (JSON in the template format), the `plan_check.py` result (order, total hours, critical path), the measurable end condition, and the stop rule.
 
+## Exit path
+- **Missing input:** no audit findings or tests: first step becomes writing characterization tests; do not plan refactors on untested code.
+- **Script problem:** if `plan_check.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if a step cannot be made reversible, flag it as a one-way door and stop for approval.
+
 ## Limits
 Hour estimates are rough. The validator checks plan structure, not whether the tests are good or the steps are right. Dynamic behaviour (reflection, runtime configuration) can defeat characterization tests: say where they are weak.

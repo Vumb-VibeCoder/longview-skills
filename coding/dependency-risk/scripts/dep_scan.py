@@ -63,7 +63,7 @@ def main():
                 lock_dirs.add(rel_dir)
             elif re.match(r"requirements.*\.txt$", f):
                 manifests.append(rel)
-                for i, line in enumerate(open(p, errors="ignore"), 1):
+                for i, line in enumerate(open(p, errors="ignore", encoding="utf-8"), 1):
                     t = line.split(" #")[0].strip()
                     if not t or t.startswith("#") or t.startswith(("-r", "-c", "--")):
                         continue
@@ -71,14 +71,14 @@ def main():
                     deps.append({"file": rel, "line": i, "name": name, "spec": t, "status": st})
             elif f == "pyproject.toml":
                 manifests.append(rel)
-                m = re.search(r"^dependencies\s*=\s*\[(.*?)\]", open(p, errors="ignore").read(), re.S | re.M)
+                m = re.search(r"^dependencies\s*=\s*\[(.*?)\]", open(p, errors="ignore", encoding="utf-8").read(), re.S | re.M)
                 for item in re.findall(r"[\"']([^\"']+)[\"']", m.group(1)) if m else []:
                     name, st = parse_requirement(item)
                     deps.append({"file": rel, "line": 0, "name": name, "spec": item, "status": st})
             elif f == "package.json":
                 manifests.append(rel)
                 try:
-                    data = json.load(open(p))
+                    data = json.load(open(p, encoding="utf-8"))
                 except Exception:
                     continue
                 for sect in ("dependencies", "devDependencies", "peerDependencies"):

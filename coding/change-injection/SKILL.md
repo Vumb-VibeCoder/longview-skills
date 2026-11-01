@@ -38,5 +38,10 @@ Work only in a **throwaway branch or git worktree**, never on the main branch or
 | Scenario | Existing files edited | Source lines | Tests broken | Radius (modules) | Score | Notes |
 Then the median score, the worst case, and the evidence path to give `verdict-format`.
 
+## Exit path
+- **Missing input:** no runnable tests or build: do the injection on paper, list touched files by search, and label it `ESTIMATED`.
+- **Script problem:** if `blast_radius.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if a change cannot be applied cleanly, stop that scenario, report the blocker, and continue with the others.
+
 ## Limits
 Changes made by an AI may differ from how the team would do them. Use results as a relative indicator across parts of the system, not an absolute number. Scenarios that need real infrastructure (production data volumes) can only be desk-estimated: say so.

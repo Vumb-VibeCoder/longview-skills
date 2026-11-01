@@ -49,6 +49,7 @@ def main():
         sdir = os.path.dirname(f)
         for sub in set(re.findall(r"(?:scripts|templates)/[\w.\-]+\.\w+", text)):
             if not os.path.exists(os.path.join(sdir, sub)): err(f"{rel}: names `{sub}` but it does not exist in the skill folder")
+        if "## Exit path" not in text: err(f"{rel}: missing '## Exit path' section")
     texts = [p for p in glob.glob(os.path.join(ROOT, "**", "*"), recursive=True)
              if p.endswith((".md", ".py", ".json")) and "dist" + os.sep not in p and "__pycache__" not in p]
     for p in texts:
@@ -80,6 +81,31 @@ def main():
                 err("cashflow.py retirement regression: numbers changed (expected 153225.57 and month 250)")
         except Exception as e:
             err(f"cashflow.py retirement example failed to run: {e}")
+    # duplicate scripts: the same file name in two skills must be byte-identical (they drift otherwise)
+    import hashlib
+    seen = {}
+    for p in texts:
+        if p.endswith(".py") and os.sep + "scripts" + os.sep in p:
+            seen.setdefault(os.path.basename(p), []).append(p)
+    for base_name, paths in seen.items():
+        if len({hashlib.sha256(open(q, "rb").read()).hexdigest() for q in paths}) > 1:
+            err(f"scripts named {base_name} differ between skills: " + ", ".join(os.path.relpath(q, ROOT) for q in paths))
+    # dist/ must match the sources (skipped when this run rebuilds dist/)
+    if "--build" not in sys.argv:
+        for name, f in sk.items():
+            zp = os.path.join(ROOT, "dist", name + ".zip")
+            if not os.path.exists(zp):
+                err(f"dist/{name}.zip missing (run with --build)"); continue
+            base = os.path.dirname(f); want = {}
+            for dp, dn, fn in os.walk(base):
+                dn[:] = [x for x in dn if x != "__pycache__"]
+                for x in fn:
+                    full = os.path.join(dp, x)
+                    want[(name + "/" + os.path.relpath(full, base)).replace(os.sep, "/")] = open(full, "rb").read()
+            with zipfile.ZipFile(zp) as z:
+                have = {n: z.read(n) for n in z.namelist() if not n.endswith("/")}
+            if have != want:
+                err(f"dist/{name}.zip is stale (run with --build)")
     print(f"{len(sk)} skills, {len(texts)} text files checked")
     if errors:
         print(f"FAIL: {len(errors)} problem(s)"); [print(" -", e) for e in errors]

@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or idea
+    url: https://github.com/Vumb-VibeCoder/longview-skills/discussions
+    about: Open a discussion if it is not a bug or a wrong answer.

@@ -89,4 +89,7 @@ def main():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except (OSError, ValueError, KeyError, TypeError, IndexError) as _e:  # bad input -> exit 2, not a traceback
+        print(f"ERROR: {type(_e).__name__}: {_e}", file=sys.stderr); sys.exit(2)

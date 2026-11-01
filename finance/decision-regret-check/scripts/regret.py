@@ -8,7 +8,7 @@ import json, sys
 def main():
     if len(sys.argv) < 2:
         print(__doc__); sys.exit(2)
-    d = json.load(open(sys.argv[1]))
+    d = json.load(open(sys.argv[1], encoding="utf-8"))
     O, S, P = d["options"], d["scenarios"], d["payoff"]
     if len(P) != len(O) or any(len(r) != len(S) for r in P):
         print("ERROR payoff must be options x scenarios"); sys.exit(2)
@@ -35,4 +35,7 @@ def main():
     print("dominated options (never better in any scenario): " + (", ".join(dom) if dom else "none"))
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (OSError, ValueError, KeyError, TypeError, IndexError) as _e:  # bad input -> exit 2, not a traceback
+        print(f"ERROR: {type(_e).__name__}: {_e}", file=sys.stderr); sys.exit(2)

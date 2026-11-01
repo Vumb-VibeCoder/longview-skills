@@ -21,7 +21,7 @@ def match(rel, pat):
 
 
 def imports(path):
-    txt = open(path, errors="ignore").read()
+    txt = open(path, errors="ignore", encoding="utf-8").read()
     if path.endswith(".py"):
         try:
             res = []
@@ -42,7 +42,7 @@ def imports(path):
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
-    rules = json.load(open(sys.argv[1]))
+    rules = json.load(open(sys.argv[1], encoding="utf-8"))
     root = sys.argv[2] if len(sys.argv) > 2 else "."
     bad = [r.get("id", "?") for r in rules if not r.get("id") or not r.get("why") or r.get("type") not in TYPES]
     if bad:
@@ -61,12 +61,12 @@ def main():
                 viol += [(rule["id"], f"{rel}:{ln}", f"imports {mod}", rule["why"])
                          for mod, ln in imports(path) if re.search(rule["to"], mod)]
             elif t == "max_file_lines" and match(rel, rule["glob"]):
-                n = sum(1 for _ in open(path, errors="ignore"))
+                n = sum(1 for _ in open(path, errors="ignore", encoding="utf-8"))
                 if n > rule["max"]:
                     viol.append((rule["id"], rel, f"{n} lines > {rule['max']}", rule["why"]))
             elif t == "forbid_pattern" and match(rel, rule["glob"]):
                 viol += [(rule["id"], f"{rel}:{i}", l.strip()[:80], rule["why"])
-                         for i, l in enumerate(open(path, errors="ignore"), 1) if re.search(rule["regex"], l)]
+                         for i, l in enumerate(open(path, errors="ignore", encoding="utf-8"), 1) if re.search(rule["regex"], l)]
     for v in viol:
         print(f"VIOLATION {v[0]} {v[1]}: {v[2]}  [why: {v[3]}]")
     print(f"{len(rules)} rules, {len(viol)} violations")
@@ -74,4 +74,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (OSError, ValueError, KeyError, TypeError, IndexError) as _e:  # bad input -> exit 2, not a traceback
+        print(f"ERROR: {type(_e).__name__}: {_e}", file=sys.stderr); sys.exit(2)

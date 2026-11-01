@@ -25,5 +25,10 @@ What to read or ask first. If missing: ask or stop; never guess silently.
 ## Output
 The exact shape of the result. Use `verdict-format` when a verdict is needed.
 
+## Exit path
+- **Missing input:** what to output when a required input is absent (ask, or INSUFFICIENT EVIDENCE).
+- **Script problem:** what to do when a bundled script fails (`NOT MEASURED: <script>` plus a hand-computed bound). Omit if the skill has no script.
+- **Stop or hand off:** when to stop early, or which skill takes over.
+
 ## Limits
 What this skill cannot conclude; known false-positive sources; what was not measured.

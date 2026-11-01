@@ -68,3 +68,6 @@ TOTAL: A=<>/72 B=<>/72  Effect=<+/->  Reading: <...>
 - Open a fresh chat for every task; shared chats leaked earlier answers into later ones.
 - Judge the with-skill answer for visible traces of every skill it names.
 - Verify numbers and script claims by running them before scoring honesty.
+
+## Round 4 (hard set for small models)
+See `ROUND4_PROMPTS.md` (paste-only) and `ROUND4_JUDGE.md` (hidden expectations, ground truth for H3). Written after round 3 and not used to tune the skills.

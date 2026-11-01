@@ -46,5 +46,10 @@ Plan in order: smallest change that lifts the lowest score first
 Not examined / NO EVIDENCE: ...
 ```
 
+## Exit path
+- **Missing input:** no repo or no git history: skip hotspots, mark `NOT MEASURED: hotspots`, and audit only what was provided.
+- **Script problem:** if `hotspots.py`, `scan_line_risks.py` exits 2 or crashes, fix the input once and retry. If it still fails, write `NOT MEASURED: <script>`, give a bound you can compute by hand, and do not quote a number.
+- **Stop or hand off:** if the REWRITE gate in `verdict-format` fails, the verdict is REINFORCE, not REWRITE.
+
 ## Limits
 Cannot replace domain understanding: ask the owners about things that look odd but may be intentional (consider `archaeology-test` for clarity). Git-based measures need history; squashed or shallow histories weaken them.

@@ -52,7 +52,7 @@ def main():
     for f in churn:
         p = os.path.join(repo, f)
         if os.path.isfile(p):
-            size[f] = sum(1 for _ in open(p, errors="ignore"))
+            size[f] = sum(1 for _ in open(p, errors="ignore", encoding="utf-8"))
     files = [f for f in churn if f in size]
     if not files:
         print(f"no changed code files in the window ({len(commits)} commits, {skipped} skipped as bulk)"); return
