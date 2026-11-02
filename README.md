@@ -5,7 +5,6 @@
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
 ![Skills: 37](https://img.shields.io/badge/skills-40-8A2BE2)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
-![Status: working draft](https://img.shields.io/badge/status-working%20draft-orange)
 ![Works with: Claude Code, claude.ai, AGENTS.md](https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20claude.ai%20%7C%20AGENTS.md-D97757)
 
 40 skills that make an AI assistant ask two questions before it touches your code, design or budget: will this still hold up in a few years, and does it need to?
