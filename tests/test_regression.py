@@ -195,6 +195,137 @@ class LineScan(unittest.TestCase):
         _, out, _ = run(self.script, d)
         self.assertIn("0.1375", out); self.assertNotIn("3600", out)
 
+class AiCodeAudit(unittest.TestCase):
+    script = os.path.join(ROOT, "coding", "ai-code-audit", "scripts", "scan_ai_risks.py")
+
+    def _project(self, files):
+        d = tempfile.mkdtemp()
+        for rel, text in files.items():
+            p = os.path.join(d, rel); os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w", encoding="utf-8") as fh: fh.write(text)
+        return d
+
+    def test_finds_each_pattern(self):
+        d = self._project({
+            "requirements.txt": "requests==2.31.0\n",
+            "app.py": ("import os, sys\nimport requests\nimport fancy_ai_helper\nfrom collections import OrderedDictX\n"
+                       "from abc import ABC, abstractmethod\nKEY = \"YOUR_API_KEY\"\n"
+                       "class Storage(ABC):\n    @abstractmethod\n    def save(self, x): ...\n"
+                       "class Disk(Storage):\n    def save(self, x):\n        return os.getcwdu()\n"
+                       "def process(d):\n    # rest of the code here\n    pass\n"),
+            "tests/test_app.py": ("import pytest\n\ndef test_none():\n    pass\n\ndef test_true():\n    assert True\n\n"
+                                  "def test_self():\n    x = 1\n    assert x == x\n\n@pytest.mark.skip\ndef test_skip():\n    assert 1 == 2\n"
+                                  "\ndef test_good():\n    assert 1 + 1 == 2\n")})
+        rc, out, _ = run(self.script, d, "--json")
+        rows = json.loads(out); ids = {r["pattern"] for r in rows}
+        self.assertEqual(rc, 1)
+        for want in ("A01", "A02", "A03", "A04", "A05", "A06"):
+            self.assertIn(want, ids)
+        notes = " ".join(r["note"] for r in rows)
+        self.assertIn("fancy_ai_helper", notes); self.assertIn("os.getcwdu", notes); self.assertIn("OrderedDictX", notes)
+        self.assertNotIn("test_good", notes)          # a real test is not flagged
+        self.assertNotIn("import `requests`", notes)  # declared dependency is not flagged
+
+    def test_clean_code_exit0_and_bad_path_exit2(self):
+        d = self._project({"requirements.txt": "", "ok.py": "import os\n\ndef where():\n    return os.getcwd()\n"})
+        self.assertEqual(run(self.script, d)[0], 0)
+        rc, _, err = run(self.script, "/no/such/path")
+        self.assertEqual(rc, 2); self.assertNotIn("Traceback", err)
+        self.assertEqual(run(self.script)[0], 2)
+
+    def test_alias_and_local_imports_not_flagged(self):
+        d = self._project({"requirements.txt": "PyYAML==6.0\nbeautifulsoup4\n",
+                           "helpers.py": "X = 1\n",
+                           "main.py": "import yaml\nimport bs4\nimport helpers\nprint(yaml, bs4, helpers)\n"})
+        rc, out, _ = run(self.script, d)
+        self.assertEqual(rc, 0, out)
+
+
+class DiffReview(unittest.TestCase):
+    script = os.path.join(ROOT, "coding", "diff-review", "scripts", "diff_stats.py")
+    sample = os.path.join(ROOT, "coding", "diff-review", "templates", "sample.diff")
+
+    def test_sample_diff_flags_and_masking(self):
+        rc, out, _ = run(self.script, self.sample, "--json")
+        data = json.loads(out); ids = [f["id"] for f in data["flags"]]
+        self.assertEqual(rc, 1)
+        for want in ("D04", "D05", "D06", "D07"):
+            self.assertIn(want, ids)
+        self.assertNotIn("D01", ids)                       # a test file changed
+        self.assertNotIn("abcdef123456", out)              # secret value is masked
+        self.assertEqual(data["total_changed_lines"], 14)
+
+    def test_source_without_tests_and_size_flags(self):
+        diff = "diff --git a/app/x.py b/app/x.py\n--- a/app/x.py\n+++ b/app/x.py\n@@ -1,1 +1,8 @@\n" + "".join(f"+line{i} = {i}\n" for i in range(8))
+        rc, out, _ = run(self.script, tmp_json(None, raw=diff), "--json")
+        self.assertIn("D01", [f["id"] for f in json.loads(out)["flags"]])
+        rc, out, _ = run(self.script, tmp_json(None, raw=diff), "--max-lines", "3", "--json")
+        self.assertIn("D02", [f["id"] for f in json.loads(out)["flags"]])
+
+    def test_clean_diff_exit0(self):
+        diff = ("diff --git a/app/x.py b/app/x.py\n--- a/app/x.py\n+++ b/app/x.py\n@@ -1,1 +1,2 @@\n a = 1\n+b = 2\n"
+                "diff --git a/tests/test_x.py b/tests/test_x.py\n--- a/tests/test_x.py\n+++ b/tests/test_x.py\n@@ -1,1 +1,2 @@\n def test_a():\n+    assert b == 2\n")
+        rc, out, _ = run(self.script, tmp_json(None, raw=diff))
+        self.assertEqual(rc, 0, out)
+
+    def test_bad_input_exit2_no_traceback(self):
+        for args in (["/no/such/file.diff"], [tmp_json(None, raw="not a diff at all")], ["--max-lines", "x"]):
+            rc, _, err = run(self.script, *args)
+            self.assertEqual(rc, 2, args); self.assertNotIn("Traceback", err)
+
+    def test_git_range(self):
+        try:
+            d = tempfile.mkdtemp()
+            def g(*a): subprocess.run(["git", "-C", d, *a], check=True, capture_output=True)
+            g("init", "-q"); g("config", "user.email", "a@b"); g("config", "user.name", "t")
+            for n, text in ((1, "a = 1\n"), (2, "a = 1\nprint(a)\n")):
+                with open(os.path.join(d, "m.py"), "w", encoding="utf-8") as f: f.write(text)
+                g("add", "."); g("commit", "-qm", f"c{n}")
+        except (OSError, subprocess.CalledProcessError):
+            self.skipTest("git not available")
+        r = subprocess.run([sys.executable, "-I", self.script, "--git", "HEAD~1", "--json"], cwd=d, capture_output=True, text=True)
+        self.assertEqual(r.returncode, 1, r.stderr)
+        self.assertIn("debug leftover", r.stdout)
+
+
+class ApiContract(unittest.TestCase):
+    script = os.path.join(ROOT, "coding", "api-contract-stability", "scripts", "contract_diff.py")
+    tdir = os.path.join(ROOT, "coding", "api-contract-stability", "templates")
+    old, new = os.path.join(tdir, "contract.old.example.json"), os.path.join(tdir, "contract.new.example.json")
+
+    def test_example_pair_counts_and_exit1(self):
+        rc, out, _ = run(self.script, self.old, self.new, "--json")
+        data = json.loads(out)
+        self.assertEqual(rc, 1)
+        self.assertEqual(data["counts"], {"BREAKING": 13, "RISKY": 5, "SAFE": 4})
+        notes = " ".join(c["note"] for c in data["changes"])
+        for want in ("operation removed", "field removed from the response", "new required field in the request",
+                     "authentication now required", "enum values added"):
+            self.assertIn(want, notes)
+
+    def test_direction_matters(self):
+        old = {"type": "object", "required": ["a"], "properties": {"a": {"type": "string"}, "b": {"type": "string"}}}
+        new = {"type": "object", "required": ["a", "c"], "properties": {"a": {"type": "string"}, "c": {"type": "string"}}}
+        req = run(self.script, tmp_json(old), tmp_json(new), "--mode", "request", "--json")[1]
+        resp = run(self.script, tmp_json(old), tmp_json(new), "--mode", "response", "--json")[1]
+        lv = lambda out, where: {c["level"] for c in json.loads(out)["changes"] if c["where"] == where}
+        self.assertEqual(lv(req, "$.c"), {"BREAKING"})   # new required request field breaks senders
+        self.assertEqual(lv(req, "$.b"), {"RISKY"})      # removed request field: only risky
+        self.assertEqual(lv(resp, "$.c"), {"SAFE"})      # new response field is harmless
+        self.assertEqual(lv(resp, "$.b"), {"BREAKING"})  # removed response field breaks readers
+
+    def test_identical_exit0_and_bad_inputs_exit2(self):
+        self.assertEqual(run(self.script, self.old, self.old)[0], 0)
+        for args in ([tmp_json(None, raw="{bad"), self.new], ["/no/such.json", self.new], [self.old],
+                     [tmp_json({"swagger": "2.0", "paths": {}}), self.new], [self.old, self.new, "--mode", "sideways"]):
+            rc, _, err = run(self.script, *args)
+            self.assertEqual(rc, 2, args); self.assertNotIn("Traceback", err)
+
+    def test_ref_cycle_does_not_hang(self):
+        doc = {"$ref": "#/$defs/N", "$defs": {"N": {"type": "object", "properties": {"next": {"$ref": "#/$defs/N"}, "v": {"type": "string"}}}}}
+        self.assertEqual(run(self.script, tmp_json(doc), tmp_json(doc))[0], 0)
+
+
 class Repo(unittest.TestCase):
     def test_validator(self):
         rc, out, _ = run(os.path.join(ROOT, "tools", "validate_repo.py"))
@@ -202,7 +333,8 @@ class Repo(unittest.TestCase):
 
     def test_other_scripts_fail_clean_on_bad_input(self):
         scripts = ["finance/tail-risk-review/scripts/tail_stats.py", "coding/fitness-functions/scripts/check_rules.py",
-                   "coding/adr-writer/scripts/adr_lint.py", "core/calibration-loop/scripts/calibration_report.py"]
+                   "coding/adr-writer/scripts/adr_lint.py", "core/calibration-loop/scripts/calibration_report.py",
+                   "coding/ai-code-audit/scripts/scan_ai_risks.py", "coding/diff-review/scripts/diff_stats.py"]
         for s in scripts:
             rc, _, err = run(os.path.join(ROOT, s), "/no/such/path.json")
             self.assertNotEqual(rc, 0, s); self.assertNotIn("Traceback", err, s)
