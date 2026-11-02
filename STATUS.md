@@ -11,6 +11,9 @@ Language: English only. A skill is READY only when its text is in English, its p
 | coding/fitness-functions | READY (v3) | script: check_rules.py + rules.example.json (tested incl. mutation) |
 | coding/archaeology-test | READY (v3) | script: prepare_blind_copy.py (tested) |
 | coding/adr-writer | READY (v3) | template + adr_lint.py (tested on good, bad and superseded ADRs) |
+| coding/ai-code-audit | READY (v3.15) | script: scan_ai_risks.py (tested on a seeded project: invented import, nonexistent stdlib attribute, stubs, empty tests, single-implementation ABC, unused imports; aliases and local imports not flagged). Not yet benchmarked on real AI-written repos |
+| coding/diff-review | READY (v3.15) | script: diff_stats.py + templates/sample.diff (tested: flags D01-D08, secret masking, `--git` range on a temp repo, bad input exits 2). Not yet benchmarked |
+| coding/api-contract-stability | READY (v3.15) | script: contract_diff.py + OpenAPI example pair (tested: 13 breaking / 5 risky / 4 safe on the pair, request vs response direction, $ref cycle, bad input exits 2). JSON only; Swagger 2, YAML, protobuf and GraphQL are by hand |
 | coding/line-durability, change-injection, debt-ledger, codebase-longevity-audit, logic-myopia-audit, refactor-planner | READY (v3, English) | scan_line_risks.py rewritten (fewer false positives, dedup, M05/M06); debt_calc.py with ledger mode, margin and residual interest; blast_radius.py, hotspots.py, plan_check.py added; all executed on test inputs |
 | finance/long-horizon-cashflow, scenario-stress-test | READY (v3) | cashflow.py + model.example.json (tested: base, shocks, exit code 1 on failure, missing-field error) |
 | finance/assumption-sensitivity | READY (v3) | sensitivity.py (tested: break-even checked by hand, decision-flip detection, formula-injection rejected) |
@@ -76,3 +79,6 @@ Changes made from the repeated B errors: a throwaway with one escalated componen
 - `verdict-format`: INSUFFICIENT EVIDENCE gets a `Fix now` line for known control gaps (run 3 never named idempotency in H4).
 - `horizon-fit`: a secret goes in an environment variable even in class B (run 3 left the H6 webhook in the file).
 - README: badges, shorter intro, status text updated to four rounds. Not re-measured.
+
+## v3.15 additions
+- New `coding/ai-code-audit`, `coding/diff-review` and `coding/api-contract-stability`, each with a tested script and a routing-table row. Router: 45/45 cases (5 new; written alongside the rules, so not an unbiased accuracy). Tests: 45 pass. No benchmark round has been run on the new skills yet.

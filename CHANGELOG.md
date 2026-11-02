@@ -2,6 +2,10 @@
 
 Versions follow the skill bundle, not Python packaging. Benchmark numbers are in `benchmarks/RESULTS.md`.
 
+## v3.15
+- Added `ai-code-audit` (scanner for invented imports and stdlib names, stubs, tests that cannot fail, single-implementation abstractions, unused imports), `diff-review` (diff measurement, flags D01-D08, outcome rule) and `api-contract-stability` (OpenAPI 3 and JSON Schema comparison by direction: BREAKING, RISKY, SAFE).
+- Router: three new table rows, keyword rules and five routing cases. README counts updated (40 skills, 17 in `coding/`).
+
 ## v3.14
 - `long-horizon-cashflow`: reverse-stress thresholds are rounded safely and re-run at the printed value.
 - `verdict-format`: INSUFFICIENT EVIDENCE gains a `Fix now` line for known control gaps.

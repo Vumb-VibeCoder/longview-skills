@@ -3,12 +3,12 @@
 ![CI](https://github.com/Vumb-VibeCoder/longview-skills/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/license-MIT-blue)
 ![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB?logo=python&logoColor=white)
-![Skills: 37](https://img.shields.io/badge/skills-37-8A2BE2)
+![Skills: 37](https://img.shields.io/badge/skills-40-8A2BE2)
 ![Dependencies: none](https://img.shields.io/badge/dependencies-none-brightgreen)
 ![Status: working draft](https://img.shields.io/badge/status-working%20draft-orange)
 ![Works with: Claude Code, claude.ai, AGENTS.md](https://img.shields.io/badge/works%20with-Claude%20Code%20%7C%20claude.ai%20%7C%20AGENTS.md-D97757)
 
-37 skills that make an AI assistant ask two questions before it touches your code, design or budget: will this still hold up in a few years, and does it need to?
+40 skills that make an AI assistant ask two questions before it touches your code, design or budget: will this still hold up in a few years, and does it need to?
 
 Assistants tend to fail in one of two directions. They patch the quick way, or they build a platform nobody asked for. These skills try to stop both. A throwaway script stays a throwaway script. A billing module that will outlive three teams gets real review. The same method also covers system design, UI and personal or business money.
 
@@ -26,9 +26,12 @@ Assistants tend to fail in one of two directions. They patch the quick way, or t
 | Tests that stay trustworthy for years: no rot, no flakiness | `coding/test-durability` |
 | A way back for every change: restore point, kill switch, backups | `coding/rollback-path` |
 | Inject a change and measure how far it spreads | `coding/change-injection` |
+| Review one change: size, tests, intent, way back | `coding/diff-review` |
+| Catch what AI-written code gets wrong: invented packages, stubs, tests that cannot fail | `coding/ai-code-audit` |
+| Will this API, schema or flag change break its consumers? | `coding/api-contract-stability` |
 | Mine a repo's git history for real "this got patched or reverted" cases | `benchmarks/` |
 
-Skills live in five folders: `core/` (11), `coding/` (14), `finance/` (5), `design/` (3) and `ui/` (4). Each one is a folder with a `SKILL.md` and, where something can be measured, a `scripts/` and `templates/` folder.
+Skills live in five folders: `core/` (11), `coding/` (17), `finance/` (5), `design/` (3) and `ui/` (4). Each one is a folder with a `SKILL.md` and, where something can be measured, a `scripts/` and `templates/` folder.
 
 `EXAMPLE.md` walks a single function through the whole process with real script output.
 
@@ -51,6 +54,9 @@ python coding/line-durability/scripts/scan_line_risks.py path/to/code
 python coding/debt-ledger/scripts/debt_calc.py --ledger coding/debt-ledger/templates/debt.example.json
 python finance/long-horizon-cashflow/scripts/cashflow.py finance/long-horizon-cashflow/templates/model.example.json
 python core/skill-router/scripts/route.py "should I rewrite this module?"
+python coding/ai-code-audit/scripts/scan_ai_risks.py path/to/code
+python coding/diff-review/scripts/diff_stats.py my-change.diff     # or: --git main...feature
+python coding/api-contract-stability/scripts/contract_diff.py old.json new.json
 python benchmarks/git-history-miner/miner.py path/to/git/repo --out benchmarks/cases
 ```
 
